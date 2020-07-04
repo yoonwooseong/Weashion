@@ -17,6 +17,12 @@ public class MainActivity extends AppCompatActivity {
 
     }//onCreate()
 
+    public String[] currentWeatherParser(String resultJson){
+
+        String[] arrayWeather = new String[6];
+
+        return arrayWeather;
+    }
 
 
 }

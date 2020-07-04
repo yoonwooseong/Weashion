@@ -14,7 +14,7 @@ public class LoadWeatherTask extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... voids) {
         URL url;
-        String urlStr = "https://api.openweathermap.org/data/2.5/onecall?lat="+Util.LAT+"&lon="+Util.LON+"&appid="+Util.APPID;
+        String urlStr = "https://api.openweathermap.org/data/2.5/onecall?units=metric&lat="+Util.LAT+"&lon="+Util.LON+"&appid="+Util.APPID;
         try {
             url = new URL(urlStr);
 
