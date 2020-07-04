@@ -1,7 +1,12 @@
 package com.weather.weashion;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,7 +15,14 @@ import java.net.URL;
 
 public class LoadWeatherTask extends AsyncTask<Void, Void, String> {
 
+    private Context context;
     String str, receiveMsg;
+
+    public LoadWeatherTask(Context context){
+        this.context = context;
+    }
+
+
     @Override
     protected String doInBackground(Void... voids) {
         URL url;
@@ -32,17 +44,21 @@ public class LoadWeatherTask extends AsyncTask<Void, Void, String> {
                 Log.i("MY", receiveMsg);
 
                 reader.close();
+                tmp.close();
+
             } else {
                 Log.i("통신 결과", conn.getResponseCode() + "에러");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return receiveMsg;
     }
 
     @Override
     protected void onPostExecute(String s) {
-
+        ((MainActivity)context).currentWeatherParser(s);
     }
+
+
 }
