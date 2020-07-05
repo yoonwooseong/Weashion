@@ -21,22 +21,24 @@ import java.net.URL;
 public class MainActivity extends Activity {
 
     TextView txt_city, txt_condition, txt_temp, txt_p_cloud, txt_p_humidity, txt_p_windSpeed;
+    TextView txt_uvi, txt_wind_deg, txt_rise, txt_set, txt_morn, txt_day, txt_eve, txt_night;
     Button btn_current, btn_details;
     LinearLayout box_current, box_details, largestBox;
 
-    String timezone = null;
-    String weatherDes= null;
     String temp= null;
+    String weatherMain = null;//배경선택
+    /*String timezone = null;
+    String weatherDes= null;
     String humidity= null;
     String clouds= null;
-    String windSpeed= null;
-    String weatherMain = null;//배경선택
+    String windSpeed= null;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*날씨 정보*/
         txt_city = findViewById(R.id.txt_city);
         txt_condition = findViewById(R.id.txt_condition);
         txt_temp = findViewById(R.id.txt_temp);
@@ -48,6 +50,16 @@ public class MainActivity extends Activity {
         box_current = findViewById(R.id.box_current);
         box_details = findViewById(R.id.box_details);
         largestBox = findViewById(R.id.largestBox);
+
+        /*날씨 상세 정보 ID*/
+        txt_uvi = findViewById(R.id.txt_uvi);
+        txt_wind_deg = findViewById(R.id.txt_wind_deg);
+        txt_rise = findViewById(R.id.txt_rise);
+        txt_set = findViewById(R.id.txt_set);
+        txt_morn = findViewById(R.id.txt_morn);
+        txt_day = findViewById(R.id.txt_day);
+        txt_eve = findViewById(R.id.txt_eve);
+        txt_night = findViewById(R.id.txt_night);
 
         new LoadWeatherTask(this).execute();
 
@@ -76,18 +88,35 @@ public class MainActivity extends Activity {
     //JSON 정보를 PASING 하는 메서드
     public void currentWeatherParser(String resultJson){
 
+        /*날씨 기본 정보*/
+        String timezone, weatherDes, humidity, clouds, windSpeed;
+        /*날씨 상세 정보*/
+        String sunrize, sunset, uvi, wind_deg, morn, day, eve, night;
+
         try {
             JSONObject jObject = new JSONObject(resultJson);
             JSONObject currentObject = jObject.getJSONObject("current");
             timezone = jObject.getString("timezone");
+
+            sunrize = String.valueOf(currentObject.getInt("sunrise"));
+            sunset = String.valueOf(currentObject.getInt("sunset"));
             temp = String.valueOf(currentObject.getInt("temp"));
             humidity = String.valueOf(currentObject.getInt("humidity"));
+            uvi = String.valueOf(currentObject.getInt("uvi"));
             clouds = String.valueOf(currentObject.getInt("clouds"));
             windSpeed = String.valueOf(currentObject.getDouble("wind_speed"));
+            wind_deg = String.valueOf(currentObject.getDouble("wind_deg"));
 
             JSONObject weatherCondition = (JSONObject) currentObject.getJSONArray("weather").get(0);
-            weatherDes = weatherCondition.getString("description");
             weatherMain = weatherCondition.getString("main");
+            weatherDes = weatherCondition.getString("description");
+
+            JSONObject dailyObject = (JSONObject)jObject.getJSONArray("daily").get(0);/*get(0)은 오늘날짜 +1할수록 다음날*/
+            JSONObject dailyTempObject = dailyObject.getJSONObject("temp");
+            morn = String.valueOf(dailyTempObject.getInt("morn"));
+            day = String.valueOf(dailyTempObject.getInt("day"));
+            eve = String.valueOf(dailyTempObject.getInt("eve"));
+            night = String.valueOf(dailyTempObject.getInt("night"));
             /*Log.i("MY", "여기"+currentObject);*/
 
             choiceBackground(weatherMain);
@@ -105,8 +134,17 @@ public class MainActivity extends Activity {
             edit.putString("weather", weatherMain);
             edit.putString("temp", temp);
             edit.commit();
-
             //저장된 값 불러올때 : pref.getString("weather", "")
+
+            /*상세 정보 출력*/
+            txt_rise.setText("일출"+sunrize);
+            txt_set.setText("일몰"+sunset);
+            txt_uvi.setText("자외선지수 "+uvi);
+            txt_wind_deg.setText("풍향 "+wind_deg+"°");
+            txt_morn.setText("아침 "+morn+"℃");
+            txt_day.setText("낮 "+day+"℃");
+            txt_eve.setText("저녁 "+eve+"℃");
+            txt_night.setText("밤 "+night+"℃");
 
         } catch (JSONException e) {
             e.printStackTrace();
