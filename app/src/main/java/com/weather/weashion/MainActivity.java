@@ -99,11 +99,14 @@ public class MainActivity extends Activity {
             txt_p_cloud.setText("흐림 : "+clouds+"%");
             txt_p_windSpeed.setText("풍속 : "+windSpeed+"m/s");
 
-            /*정보 저장 - 추후 네이버 api 조건에 활용*/
+            /*정보 저장(날씨, 온도) - 추후 네이버 api 조건에 활용*/
             SharedPreferences pref = getSharedPreferences("SHARE", MODE_PRIVATE);
             SharedPreferences.Editor edit = pref.edit();
             edit.putString("weather", weatherMain);
+            edit.putString("temp", temp);
             edit.commit();
+
+            //저장된 값 불러올때 : pref.getString("weather", "")
 
         } catch (JSONException e) {
             e.printStackTrace();
