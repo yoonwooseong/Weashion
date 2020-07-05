@@ -17,6 +17,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class MainActivity extends Activity {
 
@@ -137,14 +140,14 @@ public class MainActivity extends Activity {
             //저장된 값 불러올때 : pref.getString("weather", "")
 
             /*상세 정보 출력*/
-            txt_rise.setText("일출"+sunrize);
-            txt_set.setText("일몰"+sunset);
-            txt_uvi.setText("자외선지수 "+uvi);
-            txt_wind_deg.setText("풍향 "+wind_deg+"°");
-            txt_morn.setText("아침 "+morn+"℃");
-            txt_day.setText("낮 "+day+"℃");
-            txt_eve.setText("저녁 "+eve+"℃");
-            txt_night.setText("밤 "+night+"℃");
+            txt_rise.setText("일출\n"+getTimestampToDate(sunrize));
+            txt_set.setText("일몰\n"+getTimestampToDate(sunset));
+            txt_uvi.setText("자외선지수\n"+uvi);
+            txt_wind_deg.setText("풍향\n"+wind_deg+"°");
+            txt_morn.setText("아침\n"+morn+"℃");
+            txt_day.setText("낮\n"+day+"℃");
+            txt_eve.setText("저녁\n"+eve+"℃");
+            txt_night.setText("밤\n"+night+"℃");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -174,5 +177,15 @@ public class MainActivity extends Activity {
                 break;
         }
     }//choiceBackground()
+
+    //유닉스 시간을 우리가 보는 시간으로 변경하는 메서드
+    private String getTimestampToDate(String timestampStr){
+        long timestamp = Long.parseLong(timestampStr);
+        Date date = new Date(timestamp*1000L);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+9"));
+        String formattedDate = sdf.format(date);
+        return formattedDate;
+    }
 
 }
