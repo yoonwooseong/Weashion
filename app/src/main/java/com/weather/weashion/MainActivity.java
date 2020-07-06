@@ -1,12 +1,19 @@
 package com.weather.weashion;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -23,18 +30,22 @@ import java.util.TimeZone;
 
 public class MainActivity extends Activity {
 
-    TextView txt_city, txt_condition, txt_temp, txt_p_cloud, txt_p_humidity, txt_p_windSpeed;
-    TextView txt_uvi, txt_wind_deg, txt_rise, txt_set, txt_morn, txt_day, txt_eve, txt_night;
+    TextView txt_city, txt_condition, txt_temp, txt_p_cloud, txt_p_humidity;
+    TextView txt_uvi, txt_morn, txt_day, txt_eve, txt_night;
     Button btn_current, btn_details;
     LinearLayout box_current, box_details, largestBox;
 
+    String timezone = null;
     String temp= null;
     String weatherMain = null;//배경선택
-    /*String timezone = null;
-    String weatherDes= null;
-    String humidity= null;
-    String clouds= null;
-    String windSpeed= null;*/
+
+    int selectDate = 0;
+    /*도시, 날씨 번역*/
+    String cityKR, weatherKR;
+
+    AlertDialog.Builder dialog;
+    final CharSequence[] inDayItems = {"오늘","내일","모래","글피"};
+    String loadedJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +58,6 @@ public class MainActivity extends Activity {
         txt_temp = findViewById(R.id.txt_temp);
         txt_p_cloud = findViewById(R.id.txt_p_cloud);
         txt_p_humidity = findViewById(R.id.txt_p_humidity);
-        txt_p_windSpeed = findViewById(R.id.txt_p_windSpeed);
         btn_current = findViewById(R.id.btn_current);
         btn_details = findViewById(R.id.btn_details);
         box_current = findViewById(R.id.box_current);
@@ -56,13 +66,14 @@ public class MainActivity extends Activity {
 
         /*날씨 상세 정보 ID*/
         txt_uvi = findViewById(R.id.txt_uvi);
-        txt_wind_deg = findViewById(R.id.txt_wind_deg);
-        txt_rise = findViewById(R.id.txt_rise);
-        txt_set = findViewById(R.id.txt_set);
         txt_morn = findViewById(R.id.txt_morn);
         txt_day = findViewById(R.id.txt_day);
         txt_eve = findViewById(R.id.txt_eve);
         txt_night = findViewById(R.id.txt_night);
+
+        /*날짜, 도시 이벤트 추가*/
+        txt_city.setOnClickListener( click );
+        txt_condition.setOnClickListener( click );
 
         new LoadWeatherTask(this).execute();
 
@@ -92,44 +103,48 @@ public class MainActivity extends Activity {
     public void currentWeatherParser(String resultJson){
 
         /*날씨 기본 정보*/
-        String timezone, weatherDes, humidity, clouds, windSpeed;
+        String weatherDes, humidity, clouds;
         /*날씨 상세 정보*/
-        String sunrize, sunset, uvi, wind_deg, morn, day, eve, night;
+        String uvi, morn, day, eve, night;
 
         try {
             JSONObject jObject = new JSONObject(resultJson);
-            JSONObject currentObject = jObject.getJSONObject("current");
             timezone = jObject.getString("timezone");
+            String[] splitTimezone = timezone.split("/");
 
-            sunrize = String.valueOf(currentObject.getInt("sunrise"));
-            sunset = String.valueOf(currentObject.getInt("sunset"));
-            temp = String.valueOf(currentObject.getInt("temp"));
-            humidity = String.valueOf(currentObject.getInt("humidity"));
-            uvi = String.valueOf(currentObject.getInt("uvi"));
-            clouds = String.valueOf(currentObject.getInt("clouds"));
-            windSpeed = String.valueOf(currentObject.getDouble("wind_speed"));
-            wind_deg = String.valueOf(currentObject.getDouble("wind_deg"));
+            if( selectDate == 0 ){
+                JSONObject currentObject = jObject.getJSONObject("current");
+                temp = String.valueOf(currentObject.getInt("temp"));
 
-            JSONObject weatherCondition = (JSONObject) currentObject.getJSONArray("weather").get(0);
-            weatherMain = weatherCondition.getString("main");
-            weatherDes = weatherCondition.getString("description");
+                JSONObject weatherCondition = (JSONObject) currentObject.getJSONArray("weather").get(selectDate);
+                weatherMain = weatherCondition.getString("main");
+            } else {
+                JSONObject dailyObject = (JSONObject)jObject.getJSONArray("daily").get(selectDate);
+                JSONObject tempAvg = dailyObject.getJSONObject("temp");
+                temp = String.valueOf(tempAvg.getInt("day"));
 
-            JSONObject dailyObject = (JSONObject)jObject.getJSONArray("daily").get(0);/*get(0)은 오늘날짜 +1할수록 다음날*/
+                JSONObject weatherCondition = (JSONObject) dailyObject.getJSONArray("weather").get(0);
+                weatherMain = weatherCondition.getString("main");
+            }
+
+            JSONObject dailyObject = (JSONObject)jObject.getJSONArray("daily").get(selectDate);/*get(0)은 오늘날짜 +1할수록 다음날*/
             JSONObject dailyTempObject = dailyObject.getJSONObject("temp");
             morn = String.valueOf(dailyTempObject.getInt("morn"));
             day = String.valueOf(dailyTempObject.getInt("day"));
             eve = String.valueOf(dailyTempObject.getInt("eve"));
             night = String.valueOf(dailyTempObject.getInt("night"));
-            /*Log.i("MY", "여기"+currentObject);*/
+            humidity = String.valueOf(dailyObject.getInt("humidity"));
+            clouds = String.valueOf(dailyObject.getInt("clouds"));
+            uvi = String.valueOf(dailyObject.getInt("uvi"));
+
 
             choiceBackground(weatherMain);
 
-            txt_city.setText(timezone);
-            txt_condition.setText(weatherDes);
+            txt_city.setText(cityNameKR(splitTimezone[1]));
+            txt_condition.setText(weatherKR);
             txt_temp.setText(temp+"℃");
             txt_p_humidity.setText("습도 : "+humidity+"%");
             txt_p_cloud.setText("흐림 : "+clouds+"%");
-            txt_p_windSpeed.setText("풍속 : "+windSpeed+"m/s");
 
             /*정보 저장(날씨, 온도) - 추후 네이버 api 조건에 활용*/
             SharedPreferences pref = getSharedPreferences("SHARE", MODE_PRIVATE);
@@ -140,14 +155,13 @@ public class MainActivity extends Activity {
             //저장된 값 불러올때 : pref.getString("weather", "")
 
             /*상세 정보 출력*/
-            txt_rise.setText("일출\n"+getTimestampToDate(sunrize));
-            txt_set.setText("일몰\n"+getTimestampToDate(sunset));
-            txt_uvi.setText("자외선지수\n"+uvi);
-            txt_wind_deg.setText("풍향\n"+wind_deg+"°");
+            txt_uvi.setText("자외선\n\t\t"+uvi);
             txt_morn.setText("아침\n"+morn+"℃");
             txt_day.setText("낮\n"+day+"℃");
             txt_eve.setText("저녁\n"+eve+"℃");
             txt_night.setText("밤\n"+night+"℃");
+
+            loadedJson = resultJson;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -159,22 +173,42 @@ public class MainActivity extends Activity {
         switch (weatherMain) {
             case "Clouds":
                 largestBox.setBackgroundResource(R.drawable.cloud);
+                weatherKR = "구름";
                 break;
             case "Clear":
                 largestBox.setBackgroundResource(R.drawable.clear);
+                weatherKR = "맑음";
                 break;
             case "Rain": case "Drizzle":
                 largestBox.setBackgroundResource(R.drawable.rain);
+                weatherKR = "비";
                 break;
             case "Thunderstorm":
                 largestBox.setBackgroundResource(R.drawable.thunderstorm);
+                weatherKR = "뇌우";
                 break;
             case "Snow":
                 largestBox.setBackgroundResource(R.drawable.snow);
+                weatherKR = "눈";
                 break;
             default:
                 largestBox.setBackgroundResource(R.drawable.mist);
+                weatherKR = "안개";
                 break;
+        }
+    }//choiceBackground()
+
+    /*날씨에 따른 배경화면 선택 메서드*/
+    public String cityNameKR(String city){
+        switch (city) {
+            case "Seoul":
+                return "서울";
+
+            case "Busan":
+                return "부산";
+
+            default:
+                return city;
         }
     }//choiceBackground()
 
@@ -187,5 +221,29 @@ public class MainActivity extends Activity {
         String formattedDate = sdf.format(date);
         return formattedDate;
     }
+
+    /*날씨, 도시 이벤트 추가*/
+    View.OnClickListener click = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.txt_city:
+                    break;
+                case R.id.txt_condition:
+                    dialog = new AlertDialog.Builder(MainActivity.this);
+                    dialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            selectDate = i;
+                            currentWeatherParser(loadedJson);
+                        }
+                    });
+                    dialog.setCancelable(false);
+                    dialog.create();
+                    dialog.show();
+                    break;
+            }
+        }
+    };
 
 }

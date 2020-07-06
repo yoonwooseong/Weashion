@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="20dp"
         android:padding="10dp"
         android:background="@drawable/background_radius">
 
@@ -67,6 +67,7 @@
                 android:layout_height="wrap_content"
                 android:text="날씨"
                 android:textSize="25dp"
+                android:layout_marginTop="5dp"
                 android:layout_gravity="center"
                 android:id="@+id/txt_condition"/>
 
@@ -74,9 +75,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="온도"
-                android:textSize="65dp"
+                android:textSize="60dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:id="@+id/txt_temp"/>
 
 
@@ -84,7 +85,7 @@
 
         <LinearLayout
             android:layout_width="350dp"
-            android:layout_height="200dp"
+            android:layout_height="190dp"
             android:orientation="vertical"
             android:layout_gravity="center"
             android:padding="10dp"
@@ -92,12 +93,12 @@
             android:id="@+id/box_details"
             android:visibility="gone">
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_margin="20dp">
+                android:layout_marginTop="65dp"
+                android:layout_marginLeft="20dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -107,41 +108,6 @@
                     android:layout_gravity="center"
                     android:id="@+id/txt_uvi"
                     android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="풍향"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_wind_deg"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="일출"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_rise"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="일몰"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_set"
-                    android:layout_weight="1"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginLeft="20dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -181,8 +147,6 @@
 
             </LinearLayout>
 
-
-
         </LinearLayout>
 
     </LinearLayout>
@@ -192,7 +156,7 @@
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="20dp"
         android:padding="8dp"
         android:background="@drawable/background_radius">
 
@@ -214,14 +178,14 @@
             android:gravity="center"
             android:id="@+id/txt_p_humidity"/>
 
-        <TextView
+        <!--<TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="windSpeed"
             android:textSize="20dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:id="@+id/txt_p_windSpeed"/>
+            android:id="@+id/txt_p_windSpeed"/>-->
 
     </LinearLayout>
 
