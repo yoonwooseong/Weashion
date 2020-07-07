@@ -1,35 +1,32 @@
 package com.weather.weashion;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LoadWeatherTask extends AsyncTask<Void, Void, String> {
+public class LoadWeatherTask extends AsyncTask<String, Void, String> {
 
     private Context context;
     String str, receiveMsg;
+    String v1, v2;
 
-    public LoadWeatherTask(Context context){
+    public LoadWeatherTask(Context context, String v1, String v2){
         this.context = context;
+        this.v1 = v1;
+        this.v2 = v2;
     }
 
-
     @Override
-    protected String doInBackground(Void... voids) {
+    protected String doInBackground(String... String) {
         URL url;
-        String urlStr = "https://api.openweathermap.org/data/2.5/onecall?units=metric&lat="+Util.LAT+"&lon="+Util.LON+"&appid="+Util.APPID;
+        String urlStr = "https://api.openweathermap.org/data/2.5/onecall?units=metric&lat="+v1+"&lon="+v2+"&appid="+Util.APPID;
         try {
             url = new URL(urlStr);
-
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
             Log.i("MY", urlStr);
@@ -57,7 +54,7 @@ public class LoadWeatherTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        ((MainActivity)context).currentWeatherParser(s);
+        ((WeatherActivity)context).currentWeatherParser(s);
     }
 
 

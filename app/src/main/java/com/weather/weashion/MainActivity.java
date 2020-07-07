@@ -2,6 +2,8 @@ package com.weather.weashion;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -9,7 +11,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,7 +48,9 @@ public class MainActivity extends Activity {
     String temp= null;
     String weatherMain = null;//배경선택
 
+    int touchDelay = 2;
     int selectDate = 0;
+
     /*도시, 날씨 번역*/
     String cityKR, weatherKR;
 
@@ -71,31 +82,15 @@ public class MainActivity extends Activity {
         txt_eve = findViewById(R.id.txt_eve);
         txt_night = findViewById(R.id.txt_night);
 
-        /*날짜, 도시 이벤트 추가*/
+        /*클릭 이벤트 추가*/
+        btn_current.setOnClickListener( click );
+        btn_current.setOnLongClickListener( longClick );
+        btn_details.setOnClickListener( click );
         txt_city.setOnClickListener( click );
         txt_condition.setOnClickListener( click );
 
         new LoadWeatherTask(this).execute();
 
-        btn_current.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btn_current.setBackgroundResource(R.drawable.background_radius3);
-                btn_details.setBackgroundResource(R.drawable.background_radius2);
-                box_current.setVisibility(View.VISIBLE);
-                box_details.setVisibility(View.GONE);
-            }
-        });
-
-        btn_details.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btn_current.setBackgroundResource(R.drawable.background_radius2);
-                btn_details.setBackgroundResource(R.drawable.background_radius3);
-                box_current.setVisibility(View.GONE);
-                box_details.setVisibility(View.VISIBLE);
-            }
-        });
 
     }//onCreate()
 
@@ -227,8 +222,71 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View view) {
             switch (view.getId()){
-                case R.id.txt_city:
+                case R.id.btn_current:
+                    btn_current.setBackgroundResource(R.drawable.background_radius3);
+                    btn_details.setBackgroundResource(R.drawable.background_radius2);
+                    box_current.setVisibility(View.VISIBLE);
+                    box_details.setVisibility(View.GONE);
+                    Log.i("MY","안되나?");
                     break;
+
+                case R.id.btn_details:
+                    btn_current.setBackgroundResource(R.drawable.background_radius2);
+                    btn_details.setBackgroundResource(R.drawable.background_radius3);
+                    box_current.setVisibility(View.GONE);
+                    box_details.setVisibility(View.VISIBLE);
+                    break;
+
+                case R.id.txt_city:
+                    final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    if ( Build.VERSION.SDK_INT >= 23 &&
+                            ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+                        ActivityCompat.requestPermissions( MainActivity.this, new String[] {  android.Manifest.permission.ACCESS_FINE_LOCATION  },
+                                0 );
+                    }
+                    else{
+                        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        String provider = location.getProvider();
+                        double longitude = location.getLongitude();
+                        double latitude = location.getLatitude();
+                        double altitude = location.getAltitude();
+
+                        Log.i("MY","위치정보 : " + provider + "\n" +
+                                "위도 : " + longitude + "\n" +
+                                "경도 : " + latitude + "\n" +
+                                "고도  : " + altitude);
+
+                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                                1000,
+                                1,
+                                gpsLocationListener);
+                        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                                1000,
+                                1,
+                                gpsLocationListener);
+                    }
+                    final LocationListener gpsLocationListener = new LocationListener() {
+                        public void onLocationChanged(Location location) {
+
+                            String provider = location.getProvider();
+                            double longitude = location.getLongitude();
+                            double latitude = location.getLatitude();
+                            double altitude = location.getAltitude();
+
+                        }
+
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
+
+                        public void onProviderEnabled(String provider) {
+                        }
+
+                        public void onProviderDisabled(String provider) {
+                        }
+                    };
+                    break;
+
+
                 case R.id.txt_condition:
                     dialog = new AlertDialog.Builder(MainActivity.this);
                     dialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
@@ -243,6 +301,47 @@ public class MainActivity extends Activity {
                     dialog.show();
                     break;
             }
+        }
+    };
+
+    final LocationListener gpsLocationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+
+            String provider = location.getProvider();
+            double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
+            double altitude = location.getAltitude();
+
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+    };
+
+
+    View.OnLongClickListener longClick = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            Log.i("MY","되나?");
+            dialog = new AlertDialog.Builder(MainActivity.this);
+            dialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    selectDate = i;
+                    currentWeatherParser(loadedJson);
+                }
+            });
+            dialog.setCancelable(false);
+            dialog.create();
+            dialog.show();
+
+            return true;
         }
     };
 

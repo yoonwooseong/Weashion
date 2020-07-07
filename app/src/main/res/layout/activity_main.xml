@@ -1,192 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:orientation="vertical"
-    android:background="@drawable/cloud"
-    android:id="@+id/largestBox">
+    tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="350dp"
+    <TextView
+        android:id="@+id/textview"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:padding="10dp"
-        android:background="@drawable/background_radius">
+        android:text="Hello World!"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="현재 날씨"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:background="@drawable/background_radius3"
-                android:id="@+id/btn_current"/>
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="상세 정보"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:paddingRight="20dp"
-                android:background="@drawable/background_radius2"
-                android:id="@+id/btn_details"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:padding="10dp"
-            android:background="@drawable/background_radius"
-            android:id="@+id/box_current"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="도시"
-                android:textSize="35dp"
-                android:layout_gravity="center"
-                android:id="@+id/txt_city"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="날씨"
-                android:textSize="25dp"
-                android:layout_marginTop="5dp"
-                android:layout_gravity="center"
-                android:id="@+id/txt_condition"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="온도"
-                android:textSize="60dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="5dp"
-                android:id="@+id/txt_temp"/>
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="350dp"
-            android:layout_height="190dp"
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:padding="10dp"
-            android:background="@drawable/background_radius"
-            android:id="@+id/box_details"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="65dp"
-                android:layout_marginLeft="20dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="자외선"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_uvi"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="아침"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_morn"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="낮"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_day"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="저녁"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_eve"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="밤"
-                    android:textSize="15dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/txt_night"
-                    android:layout_weight="1"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_gravity="center"
-        android:layout_width="350dp"
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:padding="8dp"
-        android:background="@drawable/background_radius">
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cloud"
-            android:textSize="20dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:id="@+id/txt_p_cloud"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="humidity"
-            android:textSize="20dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:id="@+id/txt_p_humidity"/>
-
-        <!--<TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="windSpeed"
-            android:textSize="20dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:id="@+id/txt_p_windSpeed"/>-->
-
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
