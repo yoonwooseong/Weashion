@@ -1,70 +1,155 @@
 package com.weather.weashion;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import org.json.JSONArray;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 
 public class MainActivity extends Activity {
 
-    TextView txt_city, txt_condition, txt_temp, txt_p_cloud, txt_p_humidity;
+    //---------------메인화면
+    PollActivity pollActivity;
+    View secondmain;
+    DrawerLayout drawerLayout;
+    RelativeLayout view_mode_model;
+    LinearLayout view_mode_list;
+    ImageView hat, top, bottom, shoes, rain, wimage, btn_open_drawer, btn_open_drawer_l;
+    Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_recommend;//현재 내용없음.
+
+    //---------------장바구니
+    ListView cartList;
+    ArrayList<CartVO> list;
+    TextView price, category;
+    View view;
+
+    //--------------날씨
+    TextView txt_condition, txt_temp, txt_p_cloud, txt_p_humidity;
     TextView txt_uvi, txt_morn, txt_day, txt_eve, txt_night;
     Button btn_current, btn_details;
     LinearLayout box_current, box_details, largestBox;
 
+    String imgWeatherCode;
     String timezone = null;
     String temp= null;
     String weatherMain = null;//배경선택
-
-    int touchDelay = 2;
     int selectDate = 0;
+    String weatherKR;
 
-    /*도시, 날씨 번역*/
-    String cityKR, weatherKR;
-
-    AlertDialog.Builder dialog;
-    final CharSequence[] inDayItems = {"오늘","내일","모래","글피"};
+    /*날짜 Dialog*/
+    AlertDialog.Builder dateDialog;
+    final CharSequence[] inDayItems = {"오늘","내일","모레"};
     String loadedJson;
+
+    /*GPS main*/
+    private GpsTracker gpsTracker;
+
+    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
+    private static final int PERMISSIONS_REQUEST_CODE = 100;
+    String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //--------설문조사
+        pollActivity = new PollActivity(MainActivity.this);
+        pollActivity.setDialog();
+
+        //---------------메인화면
+        drawerLayout = findViewById(R.id.drawerLayout);
+        secondmain = findViewById(R.id.largestBox);
+        btn_open_drawer = findViewById(R.id.btn_open_drawer);//서랍 열기(날씨그림) 버튼
+        btn_open_drawer_l = findViewById(R.id.btn_open_drawer_l);
+        hat = findViewById(R.id.hat);//모자그림
+        top = findViewById(R.id.top);//상의그림
+        bottom = findViewById(R.id.bottom);//바지그림
+        shoes = findViewById(R.id.shoes);//신발그림
+        rain = findViewById(R.id.rain);//우산그림
+
+        btn_mode_list = findViewById(R.id.btn_mode_list);
+        btn_mode_model = findViewById(R.id.btn_mode_model);
+        btn_mode_list_l = findViewById(R.id.btn_mode_list_l);
+        btn_mode_model_l = findViewById(R.id.btn_mode_model_l);
+        view_mode_list = findViewById(R.id.view_mode_list);
+        view_mode_model = findViewById(R.id.view_mode_model);
+
+        btn_mode_list.setPaintFlags(btn_mode_list.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        btn_mode_list_l.setPaintFlags(btn_mode_list_l.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+        btn_mode_list.setOnClickListener( modeClick );
+        btn_mode_list_l.setOnClickListener( modeClick );
+        btn_mode_model.setOnClickListener( modeClick );
+        btn_mode_model_l.setOnClickListener( modeClick );
+        btn_open_drawer.setOnClickListener(drawerOpenClick);
+        btn_open_drawer_l.setOnClickListener(drawerOpenClick);
+
+        //---------------장바구니
+        cartList = findViewById(R.id.cartList);
+
+        sampleData(); //누르면 해당 상품의 링크로 이동함.
+
+        MyAdapter myAdapter = new MyAdapter(this, R.layout.activity_resource, list);
+        cartList.setAdapter(myAdapter);
+
+        LayoutInflater linf = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+        view = linf.inflate(R.layout.activity_resource, null);
+
+        price = view.findViewById(R.id.price);
+        category = view.findViewById(R.id.category);
+
+        //항목 클릭 시 상품 정보 페이지로 이동
+        cartList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sampleData()));
+                startActivity(intent);
+            }
+        });
+
+        //---------------날씨 정보
         /*날씨 정보*/
-        txt_city = findViewById(R.id.txt_city);
         txt_condition = findViewById(R.id.txt_condition);
         txt_temp = findViewById(R.id.txt_temp);
         txt_p_cloud = findViewById(R.id.txt_p_cloud);
@@ -83,22 +168,115 @@ public class MainActivity extends Activity {
         txt_night = findViewById(R.id.txt_night);
 
         /*클릭 이벤트 추가*/
-        btn_current.setOnClickListener( click );
-        btn_current.setOnLongClickListener( longClick );
-        btn_details.setOnClickListener( click );
-        txt_city.setOnClickListener( click );
-        txt_condition.setOnClickListener( click );
+        btn_current.setOnClickListener( weatherClick );
+        btn_details.setOnClickListener( weatherClick );
+        txt_condition.setOnClickListener( weatherClick );
 
-        new LoadWeatherTask(this).execute();
+        /*GSP 추가*/
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        }else {
+            checkRunTimePermission();
+        }
+
+        gpsTracker = new GpsTracker(MainActivity.this);
+        double latitude = gpsTracker.getLatitude();
+        double longitude = gpsTracker.getLongitude();
+
+        String address = getCurrentAddress(latitude, longitude);
+        String lat = String.valueOf(latitude);
+        String lon = String.valueOf(longitude);
+
+        new LoadWeatherTask(this, lat, lon).execute();
+
+    }//onCreate
 
 
-    }//onCreate()
+    /*클릭 메서드*/
+    View.OnClickListener modeClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch ( view.getId() ){
+                case R.id.btn_mode_list: case R.id.btn_mode_list_l:
+                    btn_mode_list.setPaintFlags(btn_mode_list.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                    btn_mode_list_l.setPaintFlags(btn_mode_list_l.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                    btn_mode_model.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+                    btn_mode_model_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+                    view_mode_list.setVisibility(View.VISIBLE);
+                    view_mode_model.setVisibility(View.GONE);
+                    break;
+
+                case R.id.btn_mode_model: case R.id.btn_mode_model_l:
+                    btn_mode_list.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+                    btn_mode_list_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
+                    btn_mode_model.setPaintFlags(btn_mode_model.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                    btn_mode_model_l.setPaintFlags(btn_mode_model_l.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                    view_mode_list.setVisibility(View.GONE);
+                    view_mode_model.setVisibility(View.VISIBLE);
+                    break;
+            }
+        }
+    };
+
+    View.OnClickListener drawerOpenClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            drawerLayout.openDrawer(secondmain);
+        }
+    };
+
+
+    //---------------cart
+    public String sampleData(){//샘플 데이터 - 받아온 데이터 여기에 담으면 됨
+
+        int count = 0;
+        int m_price = 30000;
+        String price = String.format("%,d", m_price);
+        int img = R.drawable.sample;//임시
+        String link = "https://www.naver.com";
+        String category = "모자";
+        list = new ArrayList<CartVO>();
+
+        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+
+        SharedPreferences pref = getSharedPreferences("CART", MODE_PRIVATE);
+
+        Log.i("MY", pref.getString("price0", ""));//가져온 장바구니의 1번째 아이템 가격
+
+        SharedPreferences.Editor edit = pref.edit();
+        edit.putInt("img" + count, img);
+        edit.putString("price" + count, price);
+        edit.putString("link" + count, link);
+        edit.putString("category" + count, category);
+        edit.commit();
+
+        return link;
+    } //sampleData()
+
+    //---------------날씨
+    public void changeText(int i){
+        switch (i){
+            case Util.TODAY:
+                btn_current.setText("현재 날씨");
+                break;
+            case Util.TOMORROW:
+                btn_current.setText("내일 평균 날씨");
+                break;
+            case Util.AFTERTOMORROW:
+                btn_current.setText("모래 평균 날씨");
+                break;
+        }
+    }
 
     //JSON 정보를 PASING 하는 메서드
     public void currentWeatherParser(String resultJson){
 
         /*날씨 기본 정보*/
-        String weatherDes, humidity, clouds;
+        String humidity, clouds;
         /*날씨 상세 정보*/
         String uvi, morn, day, eve, night;
 
@@ -107,7 +285,7 @@ public class MainActivity extends Activity {
             timezone = jObject.getString("timezone");
             String[] splitTimezone = timezone.split("/");
 
-            if( selectDate == 0 ){
+            if( selectDate == Util.TODAY  ){
                 JSONObject currentObject = jObject.getJSONObject("current");
                 temp = String.valueOf(currentObject.getInt("temp"));
 
@@ -118,7 +296,7 @@ public class MainActivity extends Activity {
                 JSONObject tempAvg = dailyObject.getJSONObject("temp");
                 temp = String.valueOf(tempAvg.getInt("day"));
 
-                JSONObject weatherCondition = (JSONObject) dailyObject.getJSONArray("weather").get(0);
+                JSONObject weatherCondition = (JSONObject) dailyObject.getJSONArray("weather").get(Util.TODAY );
                 weatherMain = weatherCondition.getString("main");
             }
 
@@ -132,22 +310,17 @@ public class MainActivity extends Activity {
             clouds = String.valueOf(dailyObject.getInt("clouds"));
             uvi = String.valueOf(dailyObject.getInt("uvi"));
 
-
             choiceBackground(weatherMain);
+            String weatherUrl = "http://openweathermap.org/img/wn/"+imgWeatherCode+"@2x.png";
+            Glide.with(this).load(weatherUrl).into(btn_open_drawer);
+            Glide.with(this).load(weatherUrl).into(btn_open_drawer_l);
 
-            txt_city.setText(cityNameKR(splitTimezone[1]));
+            /*현재 날씨 정보 출력*/
+            /*txt_city.setText(cityNameKR(splitTimezone[1]));*/
             txt_condition.setText(weatherKR);
             txt_temp.setText(temp+"℃");
             txt_p_humidity.setText("습도 : "+humidity+"%");
             txt_p_cloud.setText("흐림 : "+clouds+"%");
-
-            /*정보 저장(날씨, 온도) - 추후 네이버 api 조건에 활용*/
-            SharedPreferences pref = getSharedPreferences("SHARE", MODE_PRIVATE);
-            SharedPreferences.Editor edit = pref.edit();
-            edit.putString("weather", weatherMain);
-            edit.putString("temp", temp);
-            edit.commit();
-            //저장된 값 불러올때 : pref.getString("weather", "")
 
             /*상세 정보 출력*/
             txt_uvi.setText("자외선\n\t\t"+uvi);
@@ -156,6 +329,14 @@ public class MainActivity extends Activity {
             txt_eve.setText("저녁\n"+eve+"℃");
             txt_night.setText("밤\n"+night+"℃");
 
+            /*정보 저장(날씨, 온도) - 추후 네이버 api 조건에 활용*/
+            SharedPreferences pref = getSharedPreferences("SHARE", MODE_PRIVATE);
+            SharedPreferences.Editor edit = pref.edit();
+            edit.putString("weather", weatherMain);
+            edit.putString("temp", temp);
+            edit.commit();
+
+            /*다시 Pasing해주기 위해 Json저장*/
             loadedJson = resultJson;
 
         } catch (JSONException e) {
@@ -167,67 +348,75 @@ public class MainActivity extends Activity {
     public void choiceBackground(String weather){
         switch (weatherMain) {
             case "Clouds":
+                imgWeatherCode = "04d";
+                price.setTextColor(Color.BLACK);
+                category.setTextColor(Color.BLACK);
                 largestBox.setBackgroundResource(R.drawable.cloud);
                 weatherKR = "구름";
                 break;
             case "Clear":
+                imgWeatherCode = "01d";
                 largestBox.setBackgroundResource(R.drawable.clear);
                 weatherKR = "맑음";
+                price.setTextColor(Color.WHITE);
+                category.setTextColor(Color.WHITE);
                 break;
             case "Rain": case "Drizzle":
+                imgWeatherCode = "09d";
+                price.setTextColor(Color.WHITE);
+                category.setTextColor(Color.WHITE);
                 largestBox.setBackgroundResource(R.drawable.rain);
                 weatherKR = "비";
                 break;
             case "Thunderstorm":
+                imgWeatherCode = "11d";
+                price.setTextColor(Color.WHITE);
+                category.setTextColor(Color.WHITE);
                 largestBox.setBackgroundResource(R.drawable.thunderstorm);
                 weatherKR = "뇌우";
                 break;
             case "Snow":
+                imgWeatherCode = "13d";
+                price.setTextColor(Color.WHITE);
+                category.setTextColor(Color.WHITE);
                 largestBox.setBackgroundResource(R.drawable.snow);
                 weatherKR = "눈";
                 break;
             default:
+                imgWeatherCode = "50d";
+                price.setTextColor(Color.WHITE);
+                category.setTextColor(Color.WHITE);
                 largestBox.setBackgroundResource(R.drawable.mist);
                 weatherKR = "안개";
                 break;
         }
     }//choiceBackground()
 
-    /*날씨에 따른 배경화면 선택 메서드*/
-    public String cityNameKR(String city){
-        switch (city) {
-            case "Seoul":
-                return "서울";
-
-            case "Busan":
-                return "부산";
-
-            default:
-                return city;
-        }
-    }//choiceBackground()
-
-    //유닉스 시간을 우리가 보는 시간으로 변경하는 메서드
-    private String getTimestampToDate(String timestampStr){
-        long timestamp = Long.parseLong(timestampStr);
-        Date date = new Date(timestamp*1000L);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+9"));
-        String formattedDate = sdf.format(date);
-        return formattedDate;
-    }
-
     /*날씨, 도시 이벤트 추가*/
-    View.OnClickListener click = new View.OnClickListener() {
+    View.OnClickListener weatherClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.btn_current:
-                    btn_current.setBackgroundResource(R.drawable.background_radius3);
-                    btn_details.setBackgroundResource(R.drawable.background_radius2);
-                    box_current.setVisibility(View.VISIBLE);
-                    box_details.setVisibility(View.GONE);
-                    Log.i("MY","안되나?");
+                    if(box_current.getVisibility() == View.VISIBLE){
+                        dateDialog = new AlertDialog.Builder(MainActivity.this);
+                        dateDialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                selectDate = i;
+                                changeText(i);
+                                currentWeatherParser(loadedJson);
+                            }
+                        });
+                        dateDialog.setCancelable(false);
+                        dateDialog.create();
+                        dateDialog.show();
+                    } else {
+                        btn_current.setBackgroundResource(R.drawable.background_radius3);
+                        btn_details.setBackgroundResource(R.drawable.background_radius2);
+                        box_current.setVisibility(View.VISIBLE);
+                        box_details.setVisibility(View.GONE);
+                    }
                     break;
 
                 case R.id.btn_details:
@@ -236,82 +425,17 @@ public class MainActivity extends Activity {
                     box_current.setVisibility(View.GONE);
                     box_details.setVisibility(View.VISIBLE);
                     break;
-
-                case R.id.txt_city:
-                    final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    if ( Build.VERSION.SDK_INT >= 23 &&
-                            ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-                        ActivityCompat.requestPermissions( MainActivity.this, new String[] {  android.Manifest.permission.ACCESS_FINE_LOCATION  },
-                                0 );
-                    }
-                    else{
-                        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        String provider = location.getProvider();
-                        double longitude = location.getLongitude();
-                        double latitude = location.getLatitude();
-                        double altitude = location.getAltitude();
-
-                        Log.i("MY","위치정보 : " + provider + "\n" +
-                                "위도 : " + longitude + "\n" +
-                                "경도 : " + latitude + "\n" +
-                                "고도  : " + altitude);
-
-                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                                1000,
-                                1,
-                                gpsLocationListener);
-                        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                                1000,
-                                1,
-                                gpsLocationListener);
-                    }
-                    final LocationListener gpsLocationListener = new LocationListener() {
-                        public void onLocationChanged(Location location) {
-
-                            String provider = location.getProvider();
-                            double longitude = location.getLongitude();
-                            double latitude = location.getLatitude();
-                            double altitude = location.getAltitude();
-
-                        }
-
-                        public void onStatusChanged(String provider, int status, Bundle extras) {
-                        }
-
-                        public void onProviderEnabled(String provider) {
-                        }
-
-                        public void onProviderDisabled(String provider) {
-                        }
-                    };
-                    break;
-
-
-                case R.id.txt_condition:
-                    dialog = new AlertDialog.Builder(MainActivity.this);
-                    dialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            selectDate = i;
-                            currentWeatherParser(loadedJson);
-                        }
-                    });
-                    dialog.setCancelable(false);
-                    dialog.create();
-                    dialog.show();
-                    break;
             }
         }
     };
 
+    //경로 수집
     final LocationListener gpsLocationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-
             String provider = location.getProvider();
             double longitude = location.getLongitude();
             double latitude = location.getLatitude();
             double altitude = location.getAltitude();
-
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -324,25 +448,169 @@ public class MainActivity extends Activity {
         }
     };
 
+    //휴대폰 가로 세로 인식
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
 
-    View.OnLongClickListener longClick = new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            Log.i("MY","되나?");
-            dialog = new AlertDialog.Builder(MainActivity.this);
-            dialog.setTitle("날짜 선택").setItems(inDayItems, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    selectDate = i;
-                    currentWeatherParser(loadedJson);
-                }
-            });
-            dialog.setCancelable(false);
-            dialog.create();
-            dialog.show();
-
-            return true;
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Intent i = new Intent(MainActivity.this, ListActivity.class);
+            startActivity(i);
+            finish();
         }
-    };
+    }
 
+    /*여기부터 GPS추가*/
+    public void onRequestPermissionsResult(int permsRequestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grandResults) {
+
+        if ( permsRequestCode == PERMISSIONS_REQUEST_CODE && grandResults.length == REQUIRED_PERMISSIONS.length) {
+
+            // 요청 코드가 PERMISSIONS_REQUEST_CODE 이고, 요청한 퍼미션 개수만큼 수신되었다면
+            boolean check_result = true;
+
+            // 모든 퍼미션을 허용했는지 체크합니다.
+            for (int result : grandResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    check_result = false;
+                    break;
+                }
+            }
+
+            if ( check_result ) {
+                //위치 값을 가져올 수 있음
+                ;
+            }
+            else {
+                // 거부한 퍼미션이 있다면 앱을 사용할 수 없는 이유를 설명해주고 앱을 종료합니다.2 가지 경우가 있습니다.
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])
+                        || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
+
+                    Toast.makeText(MainActivity.this, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요.", Toast.LENGTH_LONG).show();
+                    finish();
+
+                }else {
+                    Toast.makeText(MainActivity.this, "퍼미션이 거부되었습니다. 설정(앱 정보)에서 퍼미션을 허용해야 합니다. ", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    void checkRunTimePermission(){
+
+        //런타임 퍼미션 처리
+        // 1. 위치 퍼미션을 가지고 있는지 체크합니다.
+        int hasFineLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED &&
+                hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {
+
+            // 2. 이미 퍼미션을 가지고 있다면
+            // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식합니다.)
+            // 3.  위치 값을 가져올 수 있음
+
+        } else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요합니다. 2가지 경우(3-1, 4-1)가 있습니다.
+            // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])) {
+
+                // 3-2. 요청을 진행하기 전에 사용자가에게 퍼미션이 필요한 이유를 설명해줄 필요가 있습니다.
+                Toast.makeText(MainActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
+                // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionResult에서 수신됩니다.
+                ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS,
+                        PERMISSIONS_REQUEST_CODE);
+
+            } else {
+                // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 합니다.
+                // 요청 결과는 onRequestPermissionResult에서 수신됩니다.
+                ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS,
+                        PERMISSIONS_REQUEST_CODE);
+            }
+        }
+    }
+
+    public String getCurrentAddress( double latitude, double longitude) {
+
+        //지오코더... GPS를 주소로 변환
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+
+        try {
+            addresses = geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    7);
+        } catch (IOException ioException) {
+            //네트워크 문제
+            Toast.makeText(this, "지오코더 서비스 사용불가", Toast.LENGTH_LONG).show();
+            return "지오코더 서비스 사용불가";
+        } catch (IllegalArgumentException illegalArgumentException) {
+            Toast.makeText(this, "잘못된 GPS 좌표", Toast.LENGTH_LONG).show();
+            return "잘못된 GPS 좌표";
+        }
+
+        if (addresses == null || addresses.size() == 0) {
+            Toast.makeText(this, "주소 미발견", Toast.LENGTH_LONG).show();
+            return "주소 미발견";
+
+        }
+        Address address = addresses.get(0);
+        return address.getAddressLine(0).toString()+"\n";
+
+    }
+
+    //여기부터는 GPS 활성화를 위한 메소드들
+    private void showDialogForLocationServiceSetting() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("위치 서비스 비활성화");
+        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
+                + "위치 설정을 수정하실래요?");
+        builder.setCancelable(true);
+        builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent callGPSSettingIntent
+                        = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivityForResult(callGPSSettingIntent, GPS_ENABLE_REQUEST_CODE);
+            }
+        });
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        builder.create().show();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+
+            case GPS_ENABLE_REQUEST_CODE:
+
+                //사용자가 GPS 활성 시켰는지 검사
+                if (checkLocationServicesStatus()) {
+                    if (checkLocationServicesStatus()) {
+
+                        Log.d("@@@", "onActivityResult : GPS 활성화 되있음");
+                        checkRunTimePermission();
+                        return;
+                    }
+                }
+                break;
+        }
+    }
+    public boolean checkLocationServicesStatus() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
 }

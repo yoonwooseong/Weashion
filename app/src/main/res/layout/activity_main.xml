@@ -1,31 +1,366 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/drawerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <!--모델 모드-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/view_mode_model"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/body"
+                android:scaleType="fitXY"/>
+            <ImageView
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="350dp"
+                android:layout_width="85dp"
+                android:layout_height="230dp"
+                android:src="@drawable/umb"
+                android:id="@+id/rain"/>
+
+            <!--상단 버튼들-->
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/btn_open_drawer"
+                android:layout_alignParentLeft="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="list"
+                android:background="#00ff0000"
+                android:id="@+id/btn_mode_list"
+                android:layout_toLeftOf="@+id/btn_mode_model"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:background="#00ff0000"
+                android:layout_alignParentRight="true"
+                android:text="model"
+                android:id="@+id/btn_mode_model"/>
+            <!--여기 까지-->
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/htop">
+
+                <ImageView
+                    android:layout_width="140dp"
+                    android:layout_height="85dp"
+                    android:scaleType="fitXY"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="17dp"
+                    android:src="@drawable/hat"
+                    android:id="@+id/hat"/>
+            </FrameLayout>
+
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/htop"
+                android:layout_marginTop="28dp"
+                android:id="@+id/mtop">
+
+                <ImageView
+                    android:layout_width="240dp"
+                    android:layout_height="250dp"
+                    android:src="@drawable/top"
+                    android:scaleType="centerCrop"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="15dp"
+                    android:id="@+id/top"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/mtop"
+                android:id="@+id/btop">
+
+                <ImageView
+                    android:id="@+id/bottom"
+                    android:layout_width="245dp"
+                    android:layout_height="220dp"
+                    android:layout_marginLeft="72dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/bottom" />
+
+                <ImageView
+                    android:id="@+id/shoes"
+                    android:layout_width="105dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="bottom"
+                    android:scaleType="centerCrop"
+                    android:layout_marginLeft="142dp"
+                    android:src="@drawable/shoes" />
+
+            </FrameLayout>
+        </RelativeLayout>
+        <!--모델 모드 끝-->
+
+        <!--리스트 모드-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/view_mode_list"
+            android:visibility="visible"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="#fff"
+                android:layout_weight="1">
+
+                <!--상단 버튼들-->
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/btn_open_drawer_l"
+                    android:layout_alignParentLeft="true"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="list"
+                    android:background="#00ff0000"
+                    android:id="@+id/btn_mode_list_l"
+                    android:layout_toLeftOf="@+id/btn_mode_model_l"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:background="#00ff0000"
+                    android:layout_alignParentRight="true"
+                    android:text="model"
+                    android:id="@+id/btn_mode_model_l"/>
+
+                <!--<ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>-->
+            </RelativeLayout>
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#fcc"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+        <!--리스트 모드 끝-->
+
+
+        <!--서랍으로 사용할 레이아웃(start[왼],end[오])-->
+        <!--날씨 정보-->
+        <LinearLayout
+            android:layout_gravity="start"
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="5dp"
+            android:background="@drawable/cloud"
+            android:id="@+id/largestBox">
+
+            <LinearLayout
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:padding="10dp"
+                android:background="@drawable/background_radius">
+
+                <LinearLayout
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="현재 날씨"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:background="@drawable/background_radius3"
+                        android:id="@+id/btn_current"/>
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="상세 정보"
+                        android:paddingRight="5dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:background="@drawable/background_radius2"
+                        android:id="@+id/btn_details"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:background="@drawable/background_radius"
+                    android:id="@+id/box_current"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="온도"
+                        android:textSize="30dp"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:paddingLeft="50dp"
+                        android:id="@+id/txt_temp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="날씨"
+                        android:textSize="15dp"
+                        android:layout_margin="5dp"
+                        android:paddingLeft="25dp"
+                        android:layout_gravity="center"
+                        android:id="@+id/txt_condition"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="250dp"
+                    android:layout_height="60dp"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:background="@drawable/background_radius"
+                    android:id="@+id/box_details"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginLeft="15dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="자외선"
+                            android:textSize="11dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/txt_uvi"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="아침"
+                            android:textSize="11dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/txt_morn"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="낮"
+                            android:textSize="11dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/txt_day"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="저녁"
+                            android:textSize="11dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/txt_eve"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="밤"
+                            android:textSize="11dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/txt_night"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_gravity="center"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:padding="5dp"
+                android:background="@drawable/background_radius">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="cloud"
+                    android:textSize="15dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/txt_p_cloud"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="humidity"
+                    android:textSize="15dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/txt_p_humidity"/>
+
+            </LinearLayout>
+            <!--날씨 정보 끝-->
+
+            <!--장바구니 리스트-->
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/cartList"/>
+        </LinearLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
+    <!--서랍 끝-->
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview" />
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:text="오늘의 추천 의상"
+        android:textSize="15dp"
+        android:id="@+id/btn_recommend"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
