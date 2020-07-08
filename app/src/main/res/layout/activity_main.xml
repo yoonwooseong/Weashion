@@ -45,6 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="list"
+                android:fontFamily="@font/cafe24oneprettynight"
                 android:background="#00ff0000"
                 android:id="@+id/btn_mode_list"
                 android:layout_toLeftOf="@+id/btn_mode_model"/>
@@ -53,6 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
+                android:fontFamily="@font/cafe24oneprettynight"
                 android:background="#00ff0000"
                 android:layout_alignParentRight="true"
                 android:text="model"
@@ -144,6 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="list"
+                    android:fontFamily="@font/cafe24oneprettynight"
                     android:background="#00ff0000"
                     android:id="@+id/btn_mode_list_l"
                     android:layout_toLeftOf="@+id/btn_mode_model_l"/>
@@ -152,6 +155,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
+                    android:fontFamily="@font/cafe24oneprettynight"
                     android:background="#00ff0000"
                     android:layout_alignParentRight="true"
                     android:text="model"
@@ -198,6 +202,7 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:fontFamily="@font/cafe24oneprettynight"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="현재 날씨"
@@ -207,6 +212,7 @@
                         android:id="@+id/btn_current"/>
 
                     <Button
+                        android:fontFamily="@font/cafe24oneprettynight"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="상세 정보"
@@ -229,6 +235,7 @@
                     android:visibility="visible">
 
                     <TextView
+                        android:fontFamily="@font/cafe24oneprettynight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="온도"
@@ -239,6 +246,7 @@
                         android:id="@+id/txt_temp"/>
 
                     <TextView
+                        android:fontFamily="@font/cafe24oneprettynight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="날씨"
@@ -261,6 +269,7 @@
                     android:visibility="gone">
 
                     <LinearLayout
+
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -268,6 +277,7 @@
                         android:layout_marginLeft="15dp">
 
                         <TextView
+                            android:fontFamily="@font/cafe24oneprettynight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="자외선"
@@ -277,6 +287,7 @@
                             android:layout_weight="1"/>
 
                         <TextView
+                            android:fontFamily="@font/cafe24oneprettynight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="아침"
@@ -286,6 +297,7 @@
                             android:layout_weight="1"/>
 
                         <TextView
+                            android:fontFamily="@font/cafe24oneprettynight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="낮"
@@ -295,6 +307,7 @@
                             android:layout_weight="1"/>
 
                         <TextView
+                            android:fontFamily="@font/cafe24oneprettynight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="저녁"
@@ -304,6 +317,7 @@
                             android:layout_weight="1"/>
 
                         <TextView
+                            android:fontFamily="@font/cafe24oneprettynight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="밤"
@@ -327,6 +341,7 @@
                 android:background="@drawable/background_radius">
 
                 <TextView
+                    android:fontFamily="@font/cafe24oneprettynight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="cloud"
@@ -336,6 +351,7 @@
                     android:id="@+id/txt_p_cloud"/>
 
                 <TextView
+                    android:fontFamily="@font/cafe24oneprettynight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="humidity"

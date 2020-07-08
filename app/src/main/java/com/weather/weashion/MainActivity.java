@@ -318,7 +318,7 @@ public class MainActivity extends Activity {
             /*현재 날씨 정보 출력*/
             /*txt_city.setText(cityNameKR(splitTimezone[1]));*/
             txt_condition.setText(weatherKR);
-            txt_temp.setText(temp+"℃");
+            txt_temp.setText(temp+"도");
             txt_p_humidity.setText("습도 : "+humidity+"%");
             txt_p_cloud.setText("흐림 : "+clouds+"%");
 
