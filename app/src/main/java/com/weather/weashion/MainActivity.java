@@ -15,11 +15,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +37,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuLayout;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.bumptech.glide.Glide;
 
 import org.json.JSONException;
@@ -54,8 +61,10 @@ public class MainActivity extends Activity {
     DrawerLayout drawerLayout;
     RelativeLayout view_mode_model;
     LinearLayout view_mode_list;
-    ImageView hat, top, bottom, shoes, rain, wimage, btn_open_drawer, btn_open_drawer_l;
-    Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_recommend;//현재 내용없음.
+    ImageView hat, top, bottom, shoes, rain, wimage, img_open_drawer_l, img_open_drawer;
+    Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_open_drawer, btn_open_drawer_l,btn_recommend;//현재 내용없음.
+
+    SwipeMenuListView listView;
 
     //---------------장바구니
     ListView cartList;
@@ -93,6 +102,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         //--------설문조사
         pollActivity = new PollActivity(MainActivity.this);
         pollActivity.setDialog();
@@ -107,6 +117,8 @@ public class MainActivity extends Activity {
         bottom = findViewById(R.id.bottom);//바지그림
         shoes = findViewById(R.id.shoes);//신발그림
         rain = findViewById(R.id.rain);//우산그림
+        img_open_drawer_l = findViewById(R.id.img_open_drawer_l);
+        img_open_drawer = findViewById(R.id.img_open_drawer);
 
         btn_mode_list = findViewById(R.id.btn_mode_list);
         btn_mode_model = findViewById(R.id.btn_mode_model);
@@ -124,6 +136,31 @@ public class MainActivity extends Activity {
         btn_mode_model_l.setOnClickListener( modeClick );
         btn_open_drawer.setOnClickListener(drawerOpenClick);
         btn_open_drawer_l.setOnClickListener(drawerOpenClick);
+
+        listView = findViewById(R.id.listView);
+        listView.setMenuCreator(creator);
+
+        /*listView.setAdapter();*/
+        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        // open
+                        break;
+                    case 1:
+                        // delete
+                        break;
+                }
+                // false : close the menu; true : not close the menu
+                return false;
+            }
+        });
+
+        // Right
+        listView.setSwipeDirection(SwipeMenuListView.DIRECTION_RIGHT);
+        // Left
+        listView.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT);
 
         //---------------장바구니
         cartList = findViewById(R.id.cartList);
@@ -190,6 +227,43 @@ public class MainActivity extends Activity {
         new LoadWeatherTask(this, lat, lon).execute();
 
     }//onCreate
+
+
+    SwipeMenuCreator creator = new SwipeMenuCreator() {
+
+        @Override
+        public void create(SwipeMenu menu) {
+            // create "open" item
+            SwipeMenuItem openItem = new SwipeMenuItem(
+                    getApplicationContext());
+            // set item background
+            openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+                    0xCE)));
+            // set item width
+            openItem.setWidth(100);
+            // set item title
+            openItem.setTitle("Open");
+            // set item title fontsize
+            openItem.setTitleSize(18);
+            // set item title font color
+            openItem.setTitleColor(Color.WHITE);
+            // add to menu
+            menu.addMenuItem(openItem);
+
+            // create "delete" item
+            SwipeMenuItem deleteItem = new SwipeMenuItem(
+                    getApplicationContext());
+            // set item background
+            deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                    0x3F, 0x25)));
+            // set item width
+            deleteItem.setWidth(100);
+            // set a icon
+            deleteItem.setIcon(R.drawable.ic_launcher_background);
+            // add to menu
+            menu.addMenuItem(deleteItem);
+        }
+    };
 
 
     /*클릭 메서드*/
@@ -312,8 +386,8 @@ public class MainActivity extends Activity {
 
             choiceBackground(weatherMain);
             String weatherUrl = "http://openweathermap.org/img/wn/"+imgWeatherCode+"@2x.png";
-            Glide.with(this).load(weatherUrl).into(btn_open_drawer);
-            Glide.with(this).load(weatherUrl).into(btn_open_drawer_l);
+            Glide.with(this).load(weatherUrl).into(img_open_drawer_l);
+            Glide.with(this).load(weatherUrl).into(img_open_drawer);
 
             /*현재 날씨 정보 출력*/
             /*txt_city.setText(cityNameKR(splitTimezone[1]));*/

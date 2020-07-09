@@ -35,11 +35,21 @@
                 android:id="@+id/rain"/>
 
             <!--상단 버튼들-->
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:id="@+id/btn_open_drawer"
-                android:layout_alignParentLeft="true"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/img_open_drawer"/>
+                <Button
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="#00ff0000"
+                    android:id="@+id/btn_open_drawer"
+                    android:layout_alignParentLeft="true"/>
+            </FrameLayout>
+
 
             <Button
                 android:layout_width="wrap_content"
@@ -136,11 +146,23 @@
                 android:layout_weight="1">
 
                 <!--상단 버튼들-->
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:id="@+id/btn_open_drawer_l"
-                    android:layout_alignParentLeft="true"/>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/img_open_drawer_l"/>
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="#00ff0000"
+                        android:id="@+id/btn_open_drawer_l"
+                        android:layout_alignParentLeft="true"/>
+
+                </FrameLayout>
+
 
                 <Button
                     android:layout_width="wrap_content"
@@ -166,11 +188,12 @@
                     android:layout_height="match_parent"/>-->
             </RelativeLayout>
 
-            <ListView
+            <com.baoyz.swipemenulistview.SwipeMenuListView
+                android:layout_weight="1"
+                android:id="@+id/listView"
+                android:background="#ffd"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#fcc"
-                android:layout_weight="1"/>
+                android:layout_height="match_parent" />
 
         </LinearLayout>
         <!--리스트 모드 끝-->
