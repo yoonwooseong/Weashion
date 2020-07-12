@@ -8,6 +8,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,21 +22,23 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import android.view.inputmethod.InputMethodManager;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,7 +46,6 @@ import android.widget.Toast;
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuLayout;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.bumptech.glide.Glide;
 import com.gun0912.tedpermission.PermissionListener;
@@ -58,6 +60,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 
 public class MainActivity extends Activity {
@@ -69,14 +72,26 @@ public class MainActivity extends Activity {
     RelativeLayout view_mode_model;
     LinearLayout view_mode_list;
     ImageView hat, top, bottom, shoes, umb, img_open_drawer_l, img_open_drawer;//Model모드 이미지뷰 카테
+    ImageView model_item_0, model_item_1, model_item_2, model_item_3, model_item_4;
     Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_open_drawer, btn_open_drawer_l;
     Button addCateBtn;
+    Dialog dialog;
 
     SwipeMenuListView listView;
-    ArrayList<String> arr;
+    RecommendSetParser recommendSetParser;
+    RecommendSetAdapter recommendSetAdapter;
+    ArrayList<SearchVO> recommendSetArr;
     CateAdapter cateAdapter = null;
+    ViewResultAdapter viewResultAdapter = null;
 
-    /*메인화면 하단*/
+    static ArrayList<String> goModelImage;
+
+    /*메인화면 하단, 추가 다이얼로그 버튼*/
+    RadioGroup radioGroup;
+    int radioResult;//카테고리 추가시 어떤 카테고린지 판별하는 변수
+    Button addDialogBtn;
+    RadioButton rb_btn_0, rb_btn_1, rb_btn_2, rb_btn_3, rb_btn_4, rb_btn_5;
+
     static EditText search_tag;
     Button btn_recommend, btn_query, btn_setting;
     int start = 1;
@@ -95,8 +110,8 @@ public class MainActivity extends Activity {
     String imgWeatherCode;
     String timezone = null;
     String temp= null;
-    String weatherMain = null;//배경선택
-    int selectDate = 0;
+    String weatherMain = null;//배경 선택
+    int selectDate = 0;//날짜 선택
     String weatherKR;
 
     /*날짜 Dialog*/
@@ -120,15 +135,15 @@ public class MainActivity extends Activity {
             setPermission();
         }
 
-        arr = new ArrayList<>();
-        arr.add("나이키 모자 헤리티지86 스우시캡 볼캡");
-        arr.add("폴로랄프로렌 반팔티셔츠");
-        arr.add("The 착한 밴딩 면바지");
-        arr.add("마르지엘라 독일군 페인팅 스니커즈 S57WS0240 [249537]");
-        arr.add("커버낫 코듀라 어센틱 로고 럭색 블랙");
-        arr.add("체인팔찌 알타 캡처 미니 참 링크팔찌");
-        arr.add("다이에나롤랑 소가죽 자동버클 남자 벨트");
-        Log.i("MYMY",arr.get(1));
+        //랜덤 추천 불러오기
+        recommendSetParser = new RecommendSetParser();
+        recommendSetArr = new ArrayList<>();
+        new RecommendSetNaverAsync().execute();
+
+
+        /*InputMethodManager imm =
+                (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(.getWindowToken(), 0);*/
 
         //--------설문조사
         pollActivity = new PollActivity(MainActivity.this);
@@ -139,11 +154,11 @@ public class MainActivity extends Activity {
         secondmain = findViewById(R.id.largestBox);
         btn_open_drawer = findViewById(R.id.btn_open_drawer);//서랍 열기(날씨그림) 버튼
         btn_open_drawer_l = findViewById(R.id.btn_open_drawer_l);
-        hat = findViewById(R.id.hat);//모자그림
-        top = findViewById(R.id.top);//상의그림
-        bottom = findViewById(R.id.bottom);//바지그림
-        shoes = findViewById(R.id.shoes);//신발그림
-        umb = findViewById(R.id.umb);//우산그림
+        model_item_0 = findViewById(R.id.hat);//모자그림
+        model_item_1 = findViewById(R.id.top);//상의그림
+        model_item_2 = findViewById(R.id.bottom);//바지그림
+        model_item_3 = findViewById(R.id.shoes);//신발그림
+        model_item_4 = findViewById(R.id.umb);//우산그림
         img_open_drawer_l = findViewById(R.id.img_open_drawer_l);
         img_open_drawer = findViewById(R.id.img_open_drawer);
 
@@ -154,6 +169,8 @@ public class MainActivity extends Activity {
         view_mode_list = findViewById(R.id.view_mode_list);
         view_mode_model = findViewById(R.id.view_mode_model);
 
+        //다이얼로그
+
         search_tag = findViewById(R.id.search_tag);
         btn_recommend = findViewById(R.id.btn_recommend);
         btn_query = findViewById(R.id.btn_query);
@@ -161,8 +178,7 @@ public class MainActivity extends Activity {
         btn_mode_list.setPaintFlags(btn_mode_list.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         btn_mode_list_l.setPaintFlags(btn_mode_list_l.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-
-        hat.setOnClickListener( searchCategroyClick );
+        model_item_0.setOnClickListener( searchCategroyClick );
 
         /*상단 버튼 클릭*/
         btn_mode_list.setOnClickListener( modeClick );
@@ -174,32 +190,62 @@ public class MainActivity extends Activity {
 
         /*하단 버튼 클릭*/
         btn_recommend.setOnClickListener( bottomBtnClick );
+        btn_setting.setOnClickListener( bottomBtnClick );
         btn_query.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "배고파", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MainActivity.this, SearchActivity.class);
                 startActivity(i);
-                finish();
             }
         });
-        btn_setting.setOnClickListener( bottomBtnClick );
+
 
         addCateBtn = findViewById(R.id.addCateBtn);
 
         addCateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                arr.add("더해버리기");
-                cateAdapter.notifyDataSetChanged();
-                listView.setAdapter(cateAdapter);
+
+                dialog = new Dialog(MainActivity.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.select_add_category);
+
+                rb_btn_0 = dialog.findViewById(R.id.rb_btn_0);
+                rb_btn_1 = dialog.findViewById(R.id.rb_btn_1);
+                rb_btn_2 = dialog.findViewById(R.id.rb_btn_2);
+                rb_btn_3 = dialog.findViewById(R.id.rb_btn_3);
+                rb_btn_4 = dialog.findViewById(R.id.rb_btn_4);
+                rb_btn_5 = dialog.findViewById(R.id.rb_btn_5);
+                addDialogBtn = dialog.findViewById(R.id.addDialogBtn);
+
+                rb_btn_0.setOnClickListener( rbClick );
+                rb_btn_1.setOnClickListener( rbClick );
+                rb_btn_2.setOnClickListener( rbClick );
+                rb_btn_3.setOnClickListener( rbClick );
+                rb_btn_4.setOnClickListener( rbClick );
+                rb_btn_5.setOnClickListener( rbClick );
+                addDialogBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                radioGroup = dialog.findViewById(R.id.radioGroup);
+                radioGroup.setOnCheckedChangeListener(radioGroupButtonChangeListener);
+
+                dialog.show();
+
+               // recommendSetAdapter.notifyDataSetChanged();
+               // listView.setAdapter(recommendSetAdapter);
             }
         });
 
         listView = findViewById(R.id.listView);
 
-        cateAdapter = new CateAdapter(MainActivity.this, R.layout.list_form, arr);
-        listView.setAdapter(cateAdapter);
+        recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, recommendSetArr, listView);
+        listView.setAdapter(recommendSetAdapter);
         listView.setMenuCreator(creator);
 
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
@@ -212,9 +258,9 @@ public class MainActivity extends Activity {
                         break;
                     case 1:
                         // delete
-                        arr.remove(position);
-                        cateAdapter.notifyDataSetChanged();
-                        listView.setAdapter(cateAdapter);
+                        recommendSetArr.remove(position);
+                        viewResultAdapter.notifyDataSetChanged();
+                        listView.setAdapter(viewResultAdapter);
                         Toast.makeText(MainActivity.this," "+position+"하이",Toast.LENGTH_SHORT).show();
                         break;
                 }
@@ -251,7 +297,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        //---------------날씨 정보
+        //---------------날씨 정보-------------------------------------
         /*날씨 정보*/
         txt_condition = findViewById(R.id.txt_condition);
         txt_temp = findViewById(R.id.txt_temp);
@@ -292,7 +338,7 @@ public class MainActivity extends Activity {
 
         new LoadWeatherTask(this, lat, lon).execute();
 
-    }//onCreate
+    }//onCreate------------------------------------------------------------------
 
 
     //앱 권한 설정 감지자
@@ -386,6 +432,13 @@ public class MainActivity extends Activity {
                     break;
 
                 case R.id.btn_mode_model: case R.id.btn_mode_model_l:
+                    /*Glide.with(MainActivity.this).load(goModelImage.get(0)).into(model_item_0);
+                    Glide.with(MainActivity.this).load(goModelImage.get(1)).into(model_item_1);
+                    Glide.with(MainActivity.this).load(goModelImage.get(2)).into(model_item_2);
+                    Glide.with(MainActivity.this).load(goModelImage.get(3)).into(model_item_3);
+                    Glide.with(MainActivity.this).load(goModelImage.get(4)).into(model_item_4);*/
+
+
                     btn_mode_list.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_list_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_model.setPaintFlags(btn_mode_model.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -405,7 +458,20 @@ public class MainActivity extends Activity {
     View.OnClickListener bottomBtnClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.btn_recommend:
+                    //여긴 다시 랜덤
+                    Toast.makeText(MainActivity.this, "추천하기", Toast.LENGTH_SHORT).show();
+                    recommendSetParser = new RecommendSetParser();
+                    recommendSetArr = new ArrayList<>();
+                    new RecommendSetNaverAsync().execute();
 
+                    break;
+                case R.id.btn_setting:
+
+                    //여긴 처음 물어본 설정 변경
+                    break;
+            }
         }
     };
 
@@ -415,6 +481,65 @@ public class MainActivity extends Activity {
             switch ( view.getId() ){
                 case R.id.hat :
                     //이때 숨은 검색창에 입력해서 출력하도록
+                    break;
+            }
+        }
+    };
+
+    View.OnClickListener rbClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (view.getId()) {
+                case R.id.rb_btn_0:
+                    radioResult = Util.CATEGORY_HAT;
+                    break;
+                case R.id.rb_btn_1:
+                    radioResult = Util.CATEGORY_TOP;
+                    break;
+                case R.id.rb_btn_2:
+                    radioResult = Util.CATEGORY_BOTTOM;
+                    break;
+                case R.id.rb_btn_3:
+                    radioResult = Util.CATEGORY_SHOES;
+                    break;
+                case R.id.rb_btn_4:
+                    radioResult = Util.CATEGORY_UMB;
+                    break;
+                case R.id.rb_btn_5:
+                    radioResult = Util.CATEGORY_ACC;
+                    break;
+
+            }
+        }
+    };
+
+    RadioGroup.OnCheckedChangeListener radioGroupButtonChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            switch (checkedId){
+                case R.id.rb_btn_0:
+                    radioResult = Util.CATEGORY_HAT;
+                    Toast.makeText(MainActivity.this, "0",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.rb_btn_1:
+                    radioResult = Util.CATEGORY_TOP;
+                    Toast.makeText(MainActivity.this, "1",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.rb_btn_2:
+                    radioResult = Util.CATEGORY_BOTTOM;
+                    Toast.makeText(MainActivity.this, "2",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.rb_btn_3:
+                    radioResult = Util.CATEGORY_SHOES;
+                    Toast.makeText(MainActivity.this, "3",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.rb_btn_4:
+                    radioResult = Util.CATEGORY_UMB;
+                    Toast.makeText(MainActivity.this, "4",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.rb_btn_5:
+                    radioResult = Util.CATEGORY_ACC;
+                    Toast.makeText(MainActivity.this, "5",Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -810,5 +935,35 @@ public class MainActivity extends Activity {
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+
+    class RecommendSetNaverAsync extends AsyncTask<String , Void, ArrayList<SearchVO>> {
+
+        @Override
+        protected ArrayList<SearchVO> doInBackground(String... strings) {
+
+            recommendSetArr.add(recommendSetParser.RecommendSetParser("street hat",Util.CATEGORY_HAT));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser("street Tshirt",Util.CATEGORY_TOP));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser("street pants",Util.CATEGORY_BOTTOM));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser("street shoes",Util.CATEGORY_SHOES));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser("umbrella",Util.CATEGORY_UMB));
+
+            return recommendSetArr;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<SearchVO> searchVOS) {
+            if( recommendSetAdapter == null ){
+                recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, recommendSetArr, listView);
+
+                /*myListView.setOnScrollListener(scrollListener);*/
+                listView.setAdapter(recommendSetAdapter);
+                recommendSetAdapter.notifyDataSetChanged();
+
+                /*goModelImage.get(0);*/
+
+            }
+        }
     }
 }

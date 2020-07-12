@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="350dp"
+    android:layout_height="600dp"
+    android:background="#BBD3E6"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/cafe24oneprettynight"
+        android:text="CATEGORY"
+        android:textSize="35dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="30dp">
+
+        <RadioButton
+            android:id="@+id/rb_btn_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="모자"/>
+
+        <RadioButton
+            android:id="@+id/rb_btn_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="상의"/>
+
+        <RadioButton
+            android:id="@+id/rb_btn_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="하의"/>
+
+        <RadioButton
+            android:id="@+id/rb_btn_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="신발"/>
+
+        <RadioButton
+            android:id="@+id/rb_btn_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="우산"/>
+
+        <RadioButton
+            android:id="@+id/rb_btn_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:textSize="25dp"
+            android:text="악세사리"/>
+
+    </RadioGroup>
+
+    <Button
+        android:layout_gravity="center"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:fontFamily="@font/cafe24oneprettynight"
+        android:text="추가하기"
+        android:textSize="20dp"
+        android:background="#007DB3DD"
+        android:id="@+id/addDialogBtn"/>
+
+</LinearLayout>
