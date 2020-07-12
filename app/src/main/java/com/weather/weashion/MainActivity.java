@@ -24,12 +24,15 @@ import android.location.LocationManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -43,10 +46,14 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuLayout;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.bumptech.glide.Glide;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,10 +68,18 @@ public class MainActivity extends Activity {
     DrawerLayout drawerLayout;
     RelativeLayout view_mode_model;
     LinearLayout view_mode_list;
-    ImageView hat, top, bottom, shoes, rain, wimage, img_open_drawer_l, img_open_drawer;
-    Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_open_drawer, btn_open_drawer_l,btn_recommend;//현재 내용없음.
+    ImageView hat, top, bottom, shoes, umb, img_open_drawer_l, img_open_drawer;//Model모드 이미지뷰 카테
+    Button btn_mode_list, btn_mode_model, btn_mode_list_l, btn_mode_model_l, btn_open_drawer, btn_open_drawer_l;
+    Button addCateBtn;
 
     SwipeMenuListView listView;
+    ArrayList<String> arr;
+    CateAdapter cateAdapter = null;
+
+    /*메인화면 하단*/
+    static EditText search_tag;
+    Button btn_recommend, btn_query, btn_setting;
+    int start = 1;
 
     //---------------장바구니
     ListView cartList;
@@ -77,7 +92,6 @@ public class MainActivity extends Activity {
     TextView txt_uvi, txt_morn, txt_day, txt_eve, txt_night;
     Button btn_current, btn_details;
     LinearLayout box_current, box_details, largestBox;
-
     String imgWeatherCode;
     String timezone = null;
     String temp= null;
@@ -92,7 +106,6 @@ public class MainActivity extends Activity {
 
     /*GPS main*/
     private GpsTracker gpsTracker;
-
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -102,6 +115,20 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //내부저장소 접근 권한에 대한 수락 여부 확인
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            setPermission();
+        }
+
+        arr = new ArrayList<>();
+        arr.add("나이키 모자 헤리티지86 스우시캡 볼캡");
+        arr.add("폴로랄프로렌 반팔티셔츠");
+        arr.add("The 착한 밴딩 면바지");
+        arr.add("마르지엘라 독일군 페인팅 스니커즈 S57WS0240 [249537]");
+        arr.add("커버낫 코듀라 어센틱 로고 럭색 블랙");
+        arr.add("체인팔찌 알타 캡처 미니 참 링크팔찌");
+        arr.add("다이에나롤랑 소가죽 자동버클 남자 벨트");
+        Log.i("MYMY",arr.get(1));
 
         //--------설문조사
         pollActivity = new PollActivity(MainActivity.this);
@@ -116,7 +143,7 @@ public class MainActivity extends Activity {
         top = findViewById(R.id.top);//상의그림
         bottom = findViewById(R.id.bottom);//바지그림
         shoes = findViewById(R.id.shoes);//신발그림
-        rain = findViewById(R.id.rain);//우산그림
+        umb = findViewById(R.id.umb);//우산그림
         img_open_drawer_l = findViewById(R.id.img_open_drawer_l);
         img_open_drawer = findViewById(R.id.img_open_drawer);
 
@@ -127,9 +154,17 @@ public class MainActivity extends Activity {
         view_mode_list = findViewById(R.id.view_mode_list);
         view_mode_model = findViewById(R.id.view_mode_model);
 
+        search_tag = findViewById(R.id.search_tag);
+        btn_recommend = findViewById(R.id.btn_recommend);
+        btn_query = findViewById(R.id.btn_query);
+        btn_setting = findViewById(R.id.btn_setting);
         btn_mode_list.setPaintFlags(btn_mode_list.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         btn_mode_list_l.setPaintFlags(btn_mode_list_l.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
+
+        hat.setOnClickListener( searchCategroyClick );
+
+        /*상단 버튼 클릭*/
         btn_mode_list.setOnClickListener( modeClick );
         btn_mode_list_l.setOnClickListener( modeClick );
         btn_mode_model.setOnClickListener( modeClick );
@@ -137,19 +172,50 @@ public class MainActivity extends Activity {
         btn_open_drawer.setOnClickListener(drawerOpenClick);
         btn_open_drawer_l.setOnClickListener(drawerOpenClick);
 
+        /*하단 버튼 클릭*/
+        btn_recommend.setOnClickListener( bottomBtnClick );
+        btn_query.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "배고파", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(MainActivity.this, SearchActivity.class);
+                startActivity(i);
+                finish();
+            }
+        });
+        btn_setting.setOnClickListener( bottomBtnClick );
+
+        addCateBtn = findViewById(R.id.addCateBtn);
+
+        addCateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                arr.add("더해버리기");
+                cateAdapter.notifyDataSetChanged();
+                listView.setAdapter(cateAdapter);
+            }
+        });
+
         listView = findViewById(R.id.listView);
+
+        cateAdapter = new CateAdapter(MainActivity.this, R.layout.list_form, arr);
+        listView.setAdapter(cateAdapter);
         listView.setMenuCreator(creator);
 
-        /*listView.setAdapter();*/
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 switch (index) {
                     case 0:
                         // open
+                        Toast.makeText(MainActivity.this," "+position+"여기에 모자 클릭시 이동하는 곳과 같은 화면",Toast.LENGTH_SHORT).show();
                         break;
                     case 1:
                         // delete
+                        arr.remove(position);
+                        cateAdapter.notifyDataSetChanged();
+                        listView.setAdapter(cateAdapter);
+                        Toast.makeText(MainActivity.this," "+position+"하이",Toast.LENGTH_SHORT).show();
                         break;
                 }
                 // false : close the menu; true : not close the menu
@@ -209,7 +275,7 @@ public class MainActivity extends Activity {
         btn_details.setOnClickListener( weatherClick );
         txt_condition.setOnClickListener( weatherClick );
 
-        /*GSP 추가*/
+        /*GPS 추가*/
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
         }else {
@@ -229,6 +295,47 @@ public class MainActivity extends Activity {
     }//onCreate
 
 
+    //앱 권한 설정 감지자
+    PermissionListener permissionListener = new PermissionListener() {
+        @Override
+        public void onPermissionGranted() {
+            //모든 권한의 수락이 완료된 경우 호출되는 메서드
+        }
+
+        @Override
+        public void onPermissionDenied(List<String> deniedPermissions) {
+            //한 가지라도 허용되지 않은 권한이 있는 경우 호출되는 메서드
+            finish();
+        }
+    };
+
+    public void fileSave(String text){
+
+        File f = new File(Environment.getExternalStorageDirectory()+"/weashion/");
+        if(!f.exists()){
+            f.mkdirs();
+        }
+
+        File f2 = new File(f,  "cart.txt");
+        FileOutputStream fos = null;
+
+        try {
+            fos = new FileOutputStream(f2, true);
+            fos.write((text).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    } //fileSave()
+
+    public void setPermission(){
+        TedPermission.with(this)
+                .setPermissionListener(permissionListener)
+                .setDeniedMessage("내부 저장소 접근 권한을 허용해야 합니다.\n설정->권한 에서 해당 권한을 활성화 해주십시오.")
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE) //설정하고자 하는 권한들 다중추가 가능
+                .check();
+    }
+
+    /*list 모드일때*/
     SwipeMenuCreator creator = new SwipeMenuCreator() {
 
         @Override
@@ -240,16 +347,15 @@ public class MainActivity extends Activity {
             openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
                     0xCE)));
             // set item width
-            openItem.setWidth(100);
+            openItem.setWidth(200);
             // set item title
-            openItem.setTitle("Open");
+            openItem.setTitle("open");
             // set item title fontsize
-            openItem.setTitleSize(18);
+            openItem.setTitleSize(10);
             // set item title font color
             openItem.setTitleColor(Color.WHITE);
             // add to menu
             menu.addMenuItem(openItem);
-
             // create "delete" item
             SwipeMenuItem deleteItem = new SwipeMenuItem(
                     getApplicationContext());
@@ -257,14 +363,13 @@ public class MainActivity extends Activity {
             deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
                     0x3F, 0x25)));
             // set item width
-            deleteItem.setWidth(100);
+            deleteItem.setWidth(200);
             // set a icon
-            deleteItem.setIcon(R.drawable.ic_launcher_background);
+            deleteItem.setIcon(R.drawable.cantrash);
             // add to menu
             menu.addMenuItem(deleteItem);
         }
     };
-
 
     /*클릭 메서드*/
     View.OnClickListener modeClick = new View.OnClickListener() {
@@ -291,14 +396,29 @@ public class MainActivity extends Activity {
             }
         }
     };
-
     View.OnClickListener drawerOpenClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             drawerLayout.openDrawer(secondmain);
         }
     };
+    View.OnClickListener bottomBtnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
 
+        }
+    };
+
+    View.OnClickListener searchCategroyClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch ( view.getId() ){
+                case R.id.hat :
+                    //이때 숨은 검색창에 입력해서 출력하도록
+                    break;
+            }
+        }
+    };
 
     //---------------cart
     public String sampleData(){//샘플 데이터 - 받아온 데이터 여기에 담으면 됨
@@ -316,6 +436,10 @@ public class MainActivity extends Activity {
         list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
         list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
         list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+
+        //sampleData() 에 추가
+        String text = price + ", " + img + ", " + link + ", " + category + "\n";
+        fileSave(text);
 
         SharedPreferences pref = getSharedPreferences("CART", MODE_PRIVATE);
 

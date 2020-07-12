@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@mipmap/ic_launcher_round"
+        android:scaleType="fitXY"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/result_image"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="제품명"
+            android:textSize="18dp"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:id="@+id/result_title"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="브랜드"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:layout_marginTop="3dp"
+            android:id="@+id/result_brand"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="가격"
+            android:textColor="#757571"
+            android:fontFamily="@font/cafe24oneprettynight"
+            android:layout_marginTop="5dp"
+            android:id="@+id/result_lprice"/>
+
+    </LinearLayout>
+
+</LinearLayout>

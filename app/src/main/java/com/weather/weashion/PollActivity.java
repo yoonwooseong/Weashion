@@ -10,8 +10,8 @@ import android.widget.Toast;
 
 public class PollActivity extends Dialog {
     final CharSequence[] items = {"남자","여자"};
-    final CharSequence[] items2 = {"봄","여름","가을","겨울"};
-    final CharSequence[] items3 = {"캐주얼","힙합","인기상품","생각없음"};
+    final CharSequence[] items2 = {"웜톤","쿨톤"};
+    final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지","젠더리스","생각없음"};
     AlertDialog.Builder dialog;
     SharedPreferences shared ;
     boolean mycheck = false;
@@ -34,7 +34,7 @@ public class PollActivity extends Dialog {
                     String str = (String) items[index];
                     Log.i("MY", "" + str + "를 선택하셧습니다. 이후 내용은 생략");
                     shared.edit().putString("gender", str);
-                    dialog.setTitle("선호하는 계절은?").setItems(items2, new OnClickListener() {
+                    dialog.setTitle("당신의 피부톤은?").setItems(items2, new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int index) {
                             Toast.makeText(context.getApplicationContext(), items2[index], Toast.LENGTH_SHORT).show();

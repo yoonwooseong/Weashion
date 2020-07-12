@@ -2,6 +2,7 @@ package com.weather.weashion;
 
 public interface Util {
 
+    int SEARCH_COUNT = 20;
     int TODAY = 0;
     int TOMORROW = 1;
     int AFTERTOMORROW = 2;
