@@ -125,6 +125,10 @@ public class MainActivity extends Activity {
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,15 +142,16 @@ public class MainActivity extends Activity {
         //랜덤 추천 불러오기
         recommendSetParser = new RecommendSetParser();
         recommendSetArr = new ArrayList<>();
+        RecommendSetNaverAsync recommendSetNaverAsync;
+        recommendSetNaverAsync = new RecommendSetNaverAsync();
         new RecommendSetNaverAsync().execute();
-
 
         /*InputMethodManager imm =
                 (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(.getWindowToken(), 0);*/
 
         //--------설문조사
-        pollActivity = new PollActivity(MainActivity.this);
+        pollActivity = new PollActivity(MainActivity.this, recommendSetNaverAsync);
         pollActivity.setDialog();
 
         //---------------메인화면
@@ -259,8 +264,8 @@ public class MainActivity extends Activity {
                     case 1:
                         // delete
                         recommendSetArr.remove(position);
-                        viewResultAdapter.notifyDataSetChanged();
-                        listView.setAdapter(viewResultAdapter);
+                        recommendSetAdapter.notifyDataSetChanged();
+                        listView.setAdapter(recommendSetAdapter);
                         Toast.makeText(MainActivity.this," "+position+"하이",Toast.LENGTH_SHORT).show();
                         break;
                 }
@@ -395,7 +400,7 @@ public class MainActivity extends Activity {
             // set item width
             openItem.setWidth(200);
             // set item title
-            openItem.setTitle("open");
+            openItem.setTitle("change");
             // set item title fontsize
             openItem.setTitleSize(10);
             // set item title font color
@@ -465,6 +470,7 @@ public class MainActivity extends Activity {
                     recommendSetParser = new RecommendSetParser();
                     recommendSetArr = new ArrayList<>();
                     new RecommendSetNaverAsync().execute();
+
 
                     break;
                 case R.id.btn_setting:
@@ -937,33 +943,103 @@ public class MainActivity extends Activity {
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
+    public String settingQuery(int categoryNum) {
+        String weather, temp, gender, skin, style;
+        String category;
+        String queryStr;
+        int ranNum;
+        Random rd = new Random();
+
+        SharedPreferences shared = getSharedPreferences("SHARE", MODE_PRIVATE);
+        weather = shared.getString("weather","");
+        temp = shared.getString("temp","");
+        gender = shared.getString("gender","");
+        style = shared.getString("style","");
+
+        String[] arrHat, arrTop, arrBottom, arrShoes, arrUmb, arrAcc;
+        arrHat = new String[]{"ball cap", "bucket hat", "beanie", "newsboy cap", "beret"};
+        arrTop = new String[]{"short sleeve", "long sleeve", "hood T", "shirt", "man-to-man T"};
+        arrBottom = new String[]{"shorts", "straight pants", "wide pants", "pants", "pegged"};
+        arrShoes = new String[]{"flip-flop", "sneaker", "shoes", "boots", "running shoes"};
+        arrAcc = new String[]{"bracelet", "necklace", "piercing", "backpack", "belt"};
+
+        if (Integer.parseInt(temp) < 15){
+            ranNum = rd.nextInt(2 - 0 + 1) + 0;
+        } else {
+            ranNum = rd.nextInt(4 - 2 + 1) + 2;
+        }
+
+        switch (categoryNum){
+            case Util.CATEGORY_HAT:
+                category = arrHat[ranNum];
+                break;
+            case Util.CATEGORY_TOP:
+                category = arrTop[ranNum];
+                break;
+            case Util.CATEGORY_BOTTOM:
+                category = arrBottom[ranNum];
+                category = "bottom";
+                break;
+            case Util.CATEGORY_SHOES:
+                category = arrShoes[ranNum];
+                category = "shoes";
+                break;
+            case Util.CATEGORY_UMB:
+                category = "umbrella";
+                break;
+            case Util.CATEGORY_ACC:
+                category = arrAcc[ranNum];
+                break;
+            default:
+                category= "";
+                break;
+        }
+
+        switch (weather){
+            case "Clouds":
+
+                break;
+            case "Clear":
+
+                break;
+            case "Rain": case "Drizzle":
+
+                break;
+            case "Thunderstorm":
+
+                break;
+            case "Snow":
+
+                break;
+            default://안개
+
+                break;
+        }
+        queryStr = style + category;
+        return queryStr;
+    }
 
     class RecommendSetNaverAsync extends AsyncTask<String , Void, ArrayList<SearchVO>> {
 
         @Override
         protected ArrayList<SearchVO> doInBackground(String... strings) {
 
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street hat",Util.CATEGORY_HAT));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street Tshirt",Util.CATEGORY_TOP));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street pants",Util.CATEGORY_BOTTOM));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street shoes",Util.CATEGORY_SHOES));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("umbrella",Util.CATEGORY_UMB));
+            Log.i("TOTAL",settingQuery(Util.CATEGORY_HAT));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_HAT), Util.CATEGORY_HAT));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_TOP), Util.CATEGORY_TOP));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_BOTTOM), Util.CATEGORY_BOTTOM));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_SHOES), Util.CATEGORY_SHOES));
+            recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_UMB), Util.CATEGORY_UMB));
 
+            /*recommendSetArr.add(recommendSetParser.RecommendSetParser("street shoes", Util.CATEGORY_SHOES));*/
             return recommendSetArr;
         }
 
         @Override
         protected void onPostExecute(ArrayList<SearchVO> searchVOS) {
-            if( recommendSetAdapter == null ){
-                recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, recommendSetArr, listView);
-
-                /*myListView.setOnScrollListener(scrollListener);*/
+                recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, searchVOS, listView);
                 listView.setAdapter(recommendSetAdapter);
-                recommendSetAdapter.notifyDataSetChanged();
-
-                /*goModelImage.get(0);*/
-
-            }
+                /*recommendSetAdapter.notifyDataSetChanged();*/
         }
     }
 }

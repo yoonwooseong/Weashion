@@ -43,6 +43,18 @@ public class RecommendSetAdapter extends ArrayAdapter<SearchVO> implements Adapt
         TextView lprice = convertView.findViewById(R.id.result_lprice);
         ImageView img = convertView.findViewById(R.id.result_image);
 
+        if (rvo.getTitle() == null){
+            rvo.setTitle("");
+        }
+        if (rvo.getBrand() == null){
+            rvo.setBrand("");
+        }
+        if (rvo.getLprice() == null){
+            rvo.setLprice("");
+        }
+        if (rvo.getImage() == null){
+            rvo.setImage("@mipmap/ic_launcher_round");
+        }
         title.setText( rvo.getTitle() );
         brand.setText( rvo.getBrand() );
         lprice.setText( rvo.getLprice() );
