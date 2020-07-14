@@ -15,14 +15,6 @@ public class SearchVO {
 
     public void setType(int type) {
         this.type = type;
-    private int Type;
-
-    public int getType() {
-        return Type;
-    }
-
-    public void setType(int type) {
-        Type = type;
     }
 
     public String getImage() {
