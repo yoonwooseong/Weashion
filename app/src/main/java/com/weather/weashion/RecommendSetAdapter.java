@@ -59,6 +59,39 @@ public class RecommendSetAdapter extends ArrayAdapter<SearchVO> implements Adapt
 
             //아이콘 제작자 <a href="https://www.flaticon.com/kr/authors/freepik" title="Freepik">Freepik</a>
             //from <a href="https://www.flaticon.com/kr/" title="Flaticon">www.flaticon.com</a>
+            switch (rvo.getType()){
+                case Util.CATEGORY_HAT:
+                    Glide.with(convertView).load(R.drawable.iconhat).into(img);
+                    break;
+                case Util.CATEGORY_TOP:
+                    Glide.with(convertView).load(R.drawable.icontshirt).into(img);
+                    break;
+                case Util.CATEGORY_BOTTOM:
+                    Glide.with(convertView).load(R.drawable.iconpants).into(img);
+                    break;
+                case Util.CATEGORY_SHOES:
+                    Glide.with(convertView).load(R.drawable.iconshoes).into(img);
+                    break;
+                case Util.CATEGORY_UMB:
+                    Glide.with(convertView).load(R.drawable.iconumb).into(img);
+                    break;
+                default:
+                    Glide.with(convertView).load(rvo.getImage()).into(img);
+                    break;
+            }
+        } else {
+            Glide.with(convertView).load(rvo.getImage()).into(img);
+        }
+
+        //Glide.with(convertView).load(rvo.getImage()).into(img);
+
+
+
+        if(rvo.getImage().equals(" ")){
+            Log.i("where","여기왜안나와");
+
+            //아이콘 제작자 <a href="https://www.flaticon.com/kr/authors/freepik" title="Freepik">Freepik</a>
+            //from <a href="https://www.flaticon.com/kr/" title="Flaticon">www.flaticon.com</a>
 
             switch (rvo.getType()){
                 case Util.CATEGORY_HAT:

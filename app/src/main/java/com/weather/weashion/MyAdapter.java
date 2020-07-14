@@ -136,3 +136,43 @@ class ImgAsync extends AsyncTask<Void, Void, Bitmap> {
         mImg.setImageBitmap( bitmap );
     }
 }
+
+//이미지를 로드하는 Async클래스
+class ImgAsync extends AsyncTask<Void, Void, Bitmap> {
+
+    Bitmap bm;
+    ImageView mImg;
+    CartVO vo;
+
+    public ImgAsync(ImageView mImg, CartVO vo) {
+        this.mImg = mImg;
+        this.vo = vo;
+    }
+
+    @Override
+    protected Bitmap doInBackground(Void... voids) {
+
+        try {
+            URL img_url = new URL(vo.getImg());
+
+            BufferedInputStream bis = new BufferedInputStream( img_url.openStream() );
+
+            //얻어온 스트림으로부터 Bitmap생성
+            bm = BitmapFactory.decodeStream( bis );
+            bis.close();
+
+            return bm;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        //읽어들인 bitmap을 ImageView에 세팅
+        mImg.setImageBitmap( bitmap );
+    }
+}

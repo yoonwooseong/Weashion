@@ -63,6 +63,7 @@ public class RecommendSetParser {
             searchVO.setLprice(itemInfo.getString("lprice"));
             searchVO.setBrand(itemInfo.getString("brand"));
             searchVO.setBrand(itemInfo.getString("maker"));
+            searchVO.setMaker(itemInfo.getString("maker"));
             searchVO.setType(categoryNum);
 
             Log.i("MY", "이름" + searchVO.getTitle());

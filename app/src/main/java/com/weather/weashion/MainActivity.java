@@ -73,10 +73,10 @@ import java.util.Random;
 
 public class MainActivity extends Activity {
 
-    ArrayList<SearchVO> bufferedRecommendSetArr;
-    int startCount = 0;
-
+    static MyAdapter myAdapter = null;
+    static String cartText = "";
     String[] arrQuery = new String[]{"","","","","",""};
+    int startCount = 0;
 
     //---------------메인화면
     PollActivity pollActivity;
@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
     RecommendSetParser recommendSetParser;
     RecommendSetAdapter recommendSetAdapter;
     ArrayList<SearchVO> recommendSetArr;
+    ArrayList<SearchVO> bufferedRecommendSetArr;
     CateAdapter cateAdapter = null;
     ViewResultAdapter viewResultAdapter = null;
 
@@ -115,6 +116,7 @@ public class MainActivity extends Activity {
     static String linkText = "";
     static ArrayList<CartVO> list = new ArrayList<>();
     ListView cartList;
+    static ArrayList<CartVO> list = new ArrayList<>();
     TextView price, category;
     View view;
     String loadData = "";
@@ -167,12 +169,20 @@ public class MainActivity extends Activity {
         //랜덤 추천 불러오기
         recommendSetParser = new RecommendSetParser();
         recommendSetArr = new ArrayList<>();
+
+        bufferedRecommendSetArr = new ArrayList<>();
+
+
         RecommendSetNaverAsync recommendSetNaverAsync;
         recommendSetNaverAsync = new RecommendSetNaverAsync();
         new RecommendSetNaverAsync().execute();
 
+        /*InputMethodManager imm =
+                (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(.getWindowToken(), 0);*/
+
         //--------설문조사
-        pollActivity = new PollActivity(MainActivity.this);
+        pollActivity = new PollActivity(MainActivity.this, recommendSetNaverAsync);
         pollActivity.setDialog();
 
         //---------------메인화면
@@ -323,10 +333,15 @@ public class MainActivity extends Activity {
                         break;
                     case 1:
                         // delete
+
                         recommendSetArr.remove(position);
                         recommendSetAdapter.notifyDataSetChanged();
                         listView.setAdapter(recommendSetAdapter);
                         bufferedRecommendSetArr.remove(position);
+                        bufferedRecommendSetArr.remove(position);
+
+                        recommendSetAdapter.notifyDataSetChanged();
+                        listView.setAdapter(recommendSetAdapter);
                         Toast.makeText(MainActivity.this," "+position+"하이",Toast.LENGTH_SHORT).show();
                         break;
                 }
@@ -390,6 +405,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkText));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("여기에 링크 값을 끌어다 넣어야 함"));
                 startActivity(intent);
             }
         });
@@ -467,6 +483,25 @@ public class MainActivity extends Activity {
         }
     };
 
+    //프로그램이 종료될 때 호출할 수 있도록 수정(우선 주석 처리)
+    /*public void fileSave(String text){
+
+        File f = new File(Environment.getExternalStorageDirectory()+"/weashion/");
+        if(!f.exists()){
+            f.mkdirs();
+        }
+
+        File f2 = new File(f,  "cart.txt");
+        FileOutputStream fos = null;
+
+        try {
+            fos = new FileOutputStream(f2, true);
+            fos.write((text).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    } //fileSave()*/
+
     public void setPermission(){
         TedPermission.with(this)
                 .setPermissionListener(permissionListener)
@@ -490,6 +525,9 @@ public class MainActivity extends Activity {
             openItem.setWidth(200);
             // set item title
             openItem.setTitle("more");
+
+            openItem.setTitle("more");
+
             // set item title fontsize
             openItem.setTitleSize(10);
             // set item title font color
@@ -531,7 +569,6 @@ public class MainActivity extends Activity {
                     Glide.with(MainActivity.this).load(goModelImage.get(2)).into(model_item_2);
                     Glide.with(MainActivity.this).load(goModelImage.get(3)).into(model_item_3);
                     Glide.with(MainActivity.this).load(goModelImage.get(4)).into(model_item_4);*/
-
 
                     btn_mode_list.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_list_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
@@ -655,6 +692,14 @@ public class MainActivity extends Activity {
 
         //링크 호출
         linkText = myLink;
+    //---------------cart
+    public static ArrayList<CartVO> insertData(String myPrice, String myImg, String myLink, String myCategory){//받아온 데이터 여기에 담으면 됨
+
+        String price = myPrice;
+        //String price = String.format("%,d", m_price);
+        String img = myImg;
+        String link = myLink;
+        String category = myCategory;
 
         Log.i("MY2", "price : " + myPrice);
         Log.i("MY2", "img : " + myImg);
@@ -664,6 +709,9 @@ public class MainActivity extends Activity {
         list.add(new CartVO(img, price + "원", link, category));
         cartText += img + ", " + price + ", " + link + ", " + category + ", ";
         myAdapter.notifyDataSetChanged();
+        cartText += img + ", " + price + ", " + link + ", " + category + "\n";
+        myAdapter.notifyDataSetChanged();
+
         return list;
     } //insertData()
 
@@ -1045,6 +1093,7 @@ public class MainActivity extends Activity {
         style = shared.getString("style","");
 
         String[] arrHat, arrTop, arrBottom, arrShoes, arrUmb, arrAcc;
+
         arrHat = new String[]{"cap", "버킷햇", "뉴스보이 캡", "베레모", "비니"};
         arrTop = new String[]{"반팔티", "롱슬리브", "후드티", "셔츠", "맨투맨"};
         arrBottom = new String[]{"숏 팬츠", "와이드 팬츠", "슬랙스", "청바지", "배기팬츠"};
@@ -1055,11 +1104,13 @@ public class MainActivity extends Activity {
             ranNum = rd.nextInt(3 - 0 + 1) + 0;
         } else {
             ranNum = rd.nextInt(4 - 1 + 1) + 1;
+
         }
 
         switch (categoryNum){
             case Util.CATEGORY_HAT:
                 category = arrHat[ranNum];
+
                 arrQuery[Util.CATEGORY_HAT] = category;
                 break;
             case Util.CATEGORY_TOP:
@@ -1082,6 +1133,7 @@ public class MainActivity extends Activity {
                 category = arrAcc[ranNum];
                 arrQuery[Util.CATEGORY_ACC] = category;
                 break;*/
+
             default:
                 category= "";
                 break;
@@ -1107,6 +1159,7 @@ public class MainActivity extends Activity {
 
                 break;
         }
+
         if (category.equals("umbrella")){
             queryStr = category;
         } else if ((categoryNum == Util.CATEGORY_TOP || categoryNum == Util.CATEGORY_BOTTOM) && style.equals("스트릿 ")){
@@ -1114,6 +1167,7 @@ public class MainActivity extends Activity {
         } else {
             queryStr = category;
         }
+
         return queryStr;
     }
 
@@ -1141,6 +1195,27 @@ public class MainActivity extends Activity {
                 bufferedRecommendSetArr.addAll(recommendSetArr);
             }
 
+            if( startCount == 0 ){
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_HAT), Util.CATEGORY_HAT));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_TOP), Util.CATEGORY_TOP));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_BOTTOM), Util.CATEGORY_BOTTOM));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_SHOES), Util.CATEGORY_SHOES));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_UMB), Util.CATEGORY_UMB));
+                startCount++;
+                bufferedRecommendSetArr.addAll(recommendSetArr);
+            } else {
+                for (int i = 0; i < bufferedRecommendSetArr.size(); i++){
+                    int removeNum = bufferedRecommendSetArr.get(i).getType()-i;
+                    if (i+removeNum == bufferedRecommendSetArr.get(i).getType()){
+                        recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(i+removeNum), i+removeNum));
+                    }
+                }
+                bufferedRecommendSetArr.clear();
+                bufferedRecommendSetArr.addAll(recommendSetArr);
+            }
+
+
+            /*recommendSetArr.add(recommendSetParser.RecommendSetParser("street shoes", Util.CATEGORY_SHOES));*/
             return recommendSetArr;
         }
 
@@ -1149,6 +1224,10 @@ public class MainActivity extends Activity {
             recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, searchVOS, listView);
             listView.setAdapter(recommendSetAdapter);
 
+
+            recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, searchVOS, listView);
+            listView.setAdapter(recommendSetAdapter);
+            /*recommendSetAdapter.notifyDataSetChanged();*/
         }
     }
 
@@ -1192,6 +1271,7 @@ public class MainActivity extends Activity {
     }
 
     void fileSave(String text){
+    public void fileSave(String text){
 
         File f = new File(Environment.getExternalStorageDirectory()+"/weashion/");
         if(!f.exists()){
@@ -1205,6 +1285,17 @@ public class MainActivity extends Activity {
             fos.close();
         } catch (IOException e) {
             e.printStackTrace();
+
+        File f2 = new File(f,  "cart.txt");
+        FileOutputStream fos = null;
+
+        try {
+            fos = new FileOutputStream(f2, true);
+            fos.write((text).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+
         }
     }
+
 }

@@ -88,6 +88,7 @@ public class SearchListActivity{
                     imgAsysc.img(str);
                     imgAsysc.execute();
                     MainActivity.insertData(image[index], lprice[index], link[index], category2[index]);
+                    MainActivity.insertData(lprice[index], image[index], link[index], category2[index]);
                 }
             });
             alert.setNegativeButton("종료", new DialogInterface.OnClickListener() {

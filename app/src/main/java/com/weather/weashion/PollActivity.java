@@ -11,15 +11,20 @@ import android.widget.Toast;
 public class PollActivity extends Dialog {
     final CharSequence[] items = {"남자","여자"};
     final CharSequence[] items2 = {"웜톤","쿨톤"};
-    final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지","젠더리스","생각없음"};
+    final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지"," "};
+
     AlertDialog.Builder dialog;
     SharedPreferences shared ;
     static boolean mycheck = false;
     Context context;
+    private boolean mycheck = false;
+    private Context context;
+    MainActivity.RecommendSetNaverAsync recommendSetNaverAsync;
 
-    public PollActivity(Context context) {
+    public PollActivity(Context context, MainActivity.RecommendSetNaverAsync recommendSetNaverAsync) {
         super(context);
         this.context = context;
+        this.recommendSetNaverAsync = recommendSetNaverAsync;
         shared = (SharedPreferences)context.getSharedPreferences("SHARE", Context.MODE_PRIVATE);
     }
 
@@ -39,7 +44,7 @@ public class PollActivity extends Dialog {
                         public void onClick(DialogInterface dialogInterface, int index) {
                             Toast.makeText(context.getApplicationContext(), items2[index], Toast.LENGTH_SHORT).show();
                             String str2 = (String) items2[index];
-                            shared.edit().putString("season", str2);
+                            shared.edit().putString("skin", str2);
                             dialog.setTitle("자주 입는 스타일은?").setItems(items3, new OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int index) {
@@ -54,6 +59,30 @@ public class PollActivity extends Dialog {
                                     dialog.setNegativeButton("다시보기", new OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) { }
+                                    dialog.setTitle("다시 보겠습니까?").setItems(null, new OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            /*new MainActivity.RecommendSetNaverAsync().execute();*/
+
+                                        }
+                                    });
+                                    dialog.setPositiveButton("다시보지않기", new OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Toast.makeText(context.getApplicationContext(), "hide", Toast.LENGTH_SHORT).show();
+                                            mycheck = shared.edit().putBoolean("save", true).commit();
+                                            /*recommendSetNaverAsync.execute();*/
+
+                                        }
+                                    });
+                                    dialog.setNegativeButton("다시보기", new OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Toast.makeText(context.getApplicationContext(), "show", Toast.LENGTH_SHORT).show();
+                                            /*recommendSetNaverAsync.execute();*/
+
+                                        }
                                     });
                                     dialog.setCancelable(false);
                                     dialog.create();
@@ -73,15 +102,11 @@ public class PollActivity extends Dialog {
             dialog.setCancelable(false);
             dialog.create();
             dialog.show();
+
         }
+
     }
 
-    //마지막 다시보기 체크.
-    OnClickListener click = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            Toast.makeText(context.getApplicationContext(),"hide",Toast.LENGTH_SHORT).show();
-            mycheck = shared.edit().putBoolean("save",true).commit();
-        }
-    };
 }
+
+
