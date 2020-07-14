@@ -37,33 +37,13 @@ public class RecommendSetAdapter extends ArrayAdapter<SearchVO> implements Adapt
 
         LayoutInflater linf = (LayoutInflater)context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         convertView = linf.inflate(resource, null);//resource 라는 북xml을 컨버트뷰로 만들게요
-        if (list.get(position) == null){
-            rvo = new SearchVO();
-            rvo.setTitle("준비중");
-            rvo.setBrand("");
-            rvo.setLprice("");
-            rvo.setImage("");
-        } else {
-            rvo = list.get(position);
-        }
 
         TextView title = convertView.findViewById(R.id.result_title);
         TextView brand = convertView.findViewById(R.id.result_brand);
         TextView lprice = convertView.findViewById(R.id.result_lprice);
         ImageView img = convertView.findViewById(R.id.result_image);
 
-        if( rvo.getTitle().equals(null)){
-            rvo.setTitle("");
-        }
-        if( rvo.getBrand().equals(null)){
-            rvo.setBrand("");
-        }
-        if( rvo.getLprice().equals(null)){
-            rvo.setLprice("");
-        }
-        if( rvo.getImage().equals(null)){
-            rvo.setImage("");
-        }
+        rvo = list.get(position);
 
         Log.i("err",rvo.getTitle());
         Log.i("err",rvo.getBrand());
@@ -73,7 +53,39 @@ public class RecommendSetAdapter extends ArrayAdapter<SearchVO> implements Adapt
         title.setText( rvo.getTitle() );
         brand.setText( rvo.getBrand() );
         lprice.setText( rvo.getLprice() );
-        Glide.with(convertView).load(rvo.getImage()).into(img);
+
+        if(rvo.getImage().equals(" ")){
+            Log.i("where","여기왜안나와");
+
+            //아이콘 제작자 <a href="https://www.flaticon.com/kr/authors/freepik" title="Freepik">Freepik</a>
+            //from <a href="https://www.flaticon.com/kr/" title="Flaticon">www.flaticon.com</a>
+            switch (rvo.getType()){
+                case Util.CATEGORY_HAT:
+                    Glide.with(convertView).load(R.drawable.iconhat).into(img);
+                    break;
+                case Util.CATEGORY_TOP:
+                    Glide.with(convertView).load(R.drawable.icontshirt).into(img);
+                    break;
+                case Util.CATEGORY_BOTTOM:
+                    Glide.with(convertView).load(R.drawable.iconpants).into(img);
+                    break;
+                case Util.CATEGORY_SHOES:
+                    Glide.with(convertView).load(R.drawable.iconshoes).into(img);
+                    break;
+                case Util.CATEGORY_UMB:
+                    Glide.with(convertView).load(R.drawable.iconumb).into(img);
+                    break;
+                default:
+                    Glide.with(convertView).load(rvo.getImage()).into(img);
+                    break;
+            }
+        } else {
+            Glide.with(convertView).load(rvo.getImage()).into(img);
+        }
+
+        //Glide.with(convertView).load(rvo.getImage()).into(img);
+
+
 
         return convertView;
     }
