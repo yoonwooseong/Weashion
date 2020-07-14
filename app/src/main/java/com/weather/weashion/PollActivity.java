@@ -11,7 +11,7 @@ import android.widget.Toast;
 public class PollActivity extends Dialog {
     final CharSequence[] items = {"남자","여자"};
     final CharSequence[] items2 = {"웜톤","쿨톤"};
-    final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지","젠더리스","생각없음"};
+    final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지"," "};
     AlertDialog.Builder dialog;
     SharedPreferences shared ;
     boolean mycheck = false;

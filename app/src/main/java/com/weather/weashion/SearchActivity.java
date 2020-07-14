@@ -3,6 +3,7 @@ package com.weather.weashion;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -23,8 +25,9 @@ public class SearchActivity extends Activity {
     ArrayList<SearchVO> list;
     ViewResultAdapter adapter;
     boolean mLockListView = true;
-
+    static String queryInSearch;
     int start = 1;
+    int type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,24 @@ public class SearchActivity extends Activity {
         search_btn = findViewById(R.id.search_btn);
 
         searchParser = new SearchParser();
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        type = bundle.getInt("type",0);
+        queryInSearch = bundle.getString("query","");
+
+        Toast.makeText(SearchActivity.this,queryInSearch,Toast.LENGTH_SHORT).show();
+        if (type == 1){
+
+            search.setText(queryInSearch);
+            start = 1;//초기화
+
+            list = new ArrayList<SearchVO>();
+            adapter = null;
+            new NaverAsync().execute();
+        } else {
+            search.setText("");
+        }
 
         search_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,10 +95,8 @@ public class SearchActivity extends Activity {
 
             if( adapter == null ){
                 adapter = new ViewResultAdapter( SearchActivity.this, R.layout.search_result_item, items, myListView );
-
-                /*myListView.setOnScrollListener(scrollListener);*/
+                //queryInSearch = "";
                 myListView.setAdapter(adapter);
-
                 adapter.notifyDataSetChanged();
 
             }

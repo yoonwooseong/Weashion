@@ -1,18 +1,28 @@
 package com.weather.weashion;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedInputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class MyAdapter extends ArrayAdapter<CartVO> {
+public class MyAdapter extends ArrayAdapter<CartVO>{
 
     Context context;
     ArrayList<CartVO> data;
@@ -45,7 +55,7 @@ public class MyAdapter extends ArrayAdapter<CartVO> {
 
         //Integer.parseInt("http://www.jbros.co.kr/shopimages/jbros/3250020016782.jpg?1553672966")
 
-        img.setImageResource(Integer.parseInt(data.get(position).getImg()));
+        //img.setImageResource(Integer.parseInt(data.get(position).getImg()));
         price.setText("" + data.get(position).getPrice());
         category.setText(data.get(position).getCategory());
 
@@ -76,6 +86,48 @@ public class MyAdapter extends ArrayAdapter<CartVO> {
                 break;
         }
 
+        new ImgAsync(img, cart).execute();
+
         return convertView;
+    }
+}
+
+//이미지를 로드하는 Async클래스
+class ImgAsync extends AsyncTask<Void, Void, Bitmap> {
+
+    Bitmap bm;
+    ImageView mImg;
+    CartVO vo;
+
+    public ImgAsync(ImageView mImg, CartVO vo) {
+        this.mImg = mImg;
+        this.vo = vo;
+    }
+
+    @Override
+    protected Bitmap doInBackground(Void... voids) {
+
+        try {
+            URL img_url = new URL(vo.getImg());
+
+            BufferedInputStream bis = new BufferedInputStream( img_url.openStream() );
+
+            //얻어온 스트림으로부터 Bitmap생성
+            bm = BitmapFactory.decodeStream( bis );
+            bis.close();
+
+            return bm;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        //읽어들인 bitmap을 ImageView에 세팅
+        mImg.setImageBitmap( bitmap );
     }
 }

@@ -65,6 +65,11 @@ import java.util.Random;
 
 public class MainActivity extends Activity {
 
+    static MyAdapter myAdapter = null;
+    static String cartText = "";
+    String[] arrQuery = new String[]{"","","","","",""};
+    int startCount = 0;
+
     //---------------메인화면
     PollActivity pollActivity;
     View secondmain;
@@ -81,6 +86,7 @@ public class MainActivity extends Activity {
     RecommendSetParser recommendSetParser;
     RecommendSetAdapter recommendSetAdapter;
     ArrayList<SearchVO> recommendSetArr;
+    ArrayList<SearchVO> bufferedRecommendSetArr;
     CateAdapter cateAdapter = null;
     ViewResultAdapter viewResultAdapter = null;
 
@@ -98,7 +104,7 @@ public class MainActivity extends Activity {
 
     //---------------장바구니
     ListView cartList;
-    ArrayList<CartVO> list;
+    static ArrayList<CartVO> list = new ArrayList<>();
     TextView price, category;
     View view;
 
@@ -138,6 +144,9 @@ public class MainActivity extends Activity {
         //랜덤 추천 불러오기
         recommendSetParser = new RecommendSetParser();
         recommendSetArr = new ArrayList<>();
+        bufferedRecommendSetArr = new ArrayList<>();
+        RecommendSetNaverAsync recommendSetNaverAsync;
+        recommendSetNaverAsync = new RecommendSetNaverAsync();
         new RecommendSetNaverAsync().execute();
 
 
@@ -194,8 +203,10 @@ public class MainActivity extends Activity {
         btn_query.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "배고파", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MainActivity.this, SearchActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("type",2);
+                i.putExtras(bundle);
                 startActivity(i);
             }
         });
@@ -254,13 +265,23 @@ public class MainActivity extends Activity {
                 switch (index) {
                     case 0:
                         // open
-                        Toast.makeText(MainActivity.this," "+position+"여기에 모자 클릭시 이동하는 곳과 같은 화면",Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(MainActivity.this, SearchActivity.class);
+
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("type", 1);
+                        bundle.putString("query",arrQuery[position]);
+
+                        i.putExtras(bundle);
+                        startActivity(i);
+                        //Toast.makeText(MainActivity.this,"검색",Toast.LENGTH_SHORT).show();
                         break;
                     case 1:
                         // delete
+
                         recommendSetArr.remove(position);
-                        viewResultAdapter.notifyDataSetChanged();
-                        listView.setAdapter(viewResultAdapter);
+                        bufferedRecommendSetArr.remove(position);
+                        recommendSetAdapter.notifyDataSetChanged();
+                        listView.setAdapter(recommendSetAdapter);
                         Toast.makeText(MainActivity.this," "+position+"하이",Toast.LENGTH_SHORT).show();
                         break;
                 }
@@ -277,9 +298,7 @@ public class MainActivity extends Activity {
         //---------------장바구니
         cartList = findViewById(R.id.cartList);
 
-        sampleData(); //누르면 해당 상품의 링크로 이동함.
-
-        MyAdapter myAdapter = new MyAdapter(this, R.layout.activity_resource, list);
+        myAdapter = new MyAdapter(this, R.layout.activity_resource, list);
         cartList.setAdapter(myAdapter);
 
         LayoutInflater linf = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -292,8 +311,17 @@ public class MainActivity extends Activity {
         cartList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sampleData()));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("여기에 링크 값을 끌어다 넣어야 함"));
                 startActivity(intent);
+            }
+        });
+
+        cartList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                list.remove(i);
+                myAdapter.notifyDataSetChanged();
+                return true;
             }
         });
 
@@ -338,6 +366,12 @@ public class MainActivity extends Activity {
 
         new LoadWeatherTask(this, lat, lon).execute();
 
+        //사람 쪽 그림 클릭 이벤트
+        model_item_0.setOnClickListener(categorys);
+        model_item_1.setOnClickListener(categorys);
+        model_item_2.setOnClickListener(categorys);
+        model_item_3.setOnClickListener(categorys);
+
     }//onCreate------------------------------------------------------------------
 
 
@@ -355,7 +389,8 @@ public class MainActivity extends Activity {
         }
     };
 
-    public void fileSave(String text){
+    //프로그램이 종료될 때 호출할 수 있도록 수정(우선 주석 처리)
+    /*public void fileSave(String text){
 
         File f = new File(Environment.getExternalStorageDirectory()+"/weashion/");
         if(!f.exists()){
@@ -371,7 +406,7 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    } //fileSave()
+    } //fileSave()*/
 
     public void setPermission(){
         TedPermission.with(this)
@@ -395,7 +430,7 @@ public class MainActivity extends Activity {
             // set item width
             openItem.setWidth(200);
             // set item title
-            openItem.setTitle("open");
+            openItem.setTitle("more");
             // set item title fontsize
             openItem.setTitleSize(10);
             // set item title font color
@@ -437,7 +472,6 @@ public class MainActivity extends Activity {
                     Glide.with(MainActivity.this).load(goModelImage.get(2)).into(model_item_2);
                     Glide.with(MainActivity.this).load(goModelImage.get(3)).into(model_item_3);
                     Glide.with(MainActivity.this).load(goModelImage.get(4)).into(model_item_4);*/
-
 
                     btn_mode_list.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_list_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
@@ -546,39 +580,25 @@ public class MainActivity extends Activity {
     };
 
     //---------------cart
-    public String sampleData(){//샘플 데이터 - 받아온 데이터 여기에 담으면 됨
+    public static ArrayList<CartVO> insertData(String myPrice, String myImg, String myLink, String myCategory){//받아온 데이터 여기에 담으면 됨
 
-        int count = 0;
-        int m_price = 30000;
-        String price = String.format("%,d", m_price);
-        int img = R.drawable.sample;//임시
-        String link = "https://www.naver.com";
-        String category = "모자";
-        list = new ArrayList<CartVO>();
+        String price = myPrice;
+        //String price = String.format("%,d", m_price);
+        String img = myImg;
+        String link = myLink;
+        String category = myCategory;
 
-        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
-        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
-        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
-        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
-        list.add(new CartVO(Integer.toString(img), price + "원", link, "카테고리 : " + category));
+        Log.i("MY2", "price : " + myPrice);
+        Log.i("MY2", "img : " + myImg);
+        Log.i("MY2", "link : " + myLink);
+        Log.i("MY2", "category : " + myCategory);
 
-        //sampleData() 에 추가
-        String text = price + ", " + img + ", " + link + ", " + category + "\n";
-        fileSave(text);
+        list.add(new CartVO(img, price + "원", link, category));
+        cartText += img + ", " + price + ", " + link + ", " + category + "\n";
+        myAdapter.notifyDataSetChanged();
 
-        SharedPreferences pref = getSharedPreferences("CART", MODE_PRIVATE);
-
-        Log.i("MY", pref.getString("price0", ""));//가져온 장바구니의 1번째 아이템 가격
-
-        SharedPreferences.Editor edit = pref.edit();
-        edit.putInt("img" + count, img);
-        edit.putString("price" + count, price);
-        edit.putString("link" + count, link);
-        edit.putString("category" + count, category);
-        edit.commit();
-
-        return link;
-    } //sampleData()
+        return list;
+    } //insertData()
 
     //---------------날씨
     public void changeText(int i){
@@ -937,33 +957,170 @@ public class MainActivity extends Activity {
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
+    public String settingQuery(int categoryNum) {
+        String weather, temp, gender, skin, style;
+        String category;
+        String queryStr;
+        int ranNum;
+        Random rd = new Random();
+
+        SharedPreferences shared = getSharedPreferences("SHARE", MODE_PRIVATE);
+        weather = shared.getString("weather","");
+        temp = shared.getString("temp","");
+        gender = shared.getString("gender","");
+        style = shared.getString("style","");
+
+        String[] arrHat, arrTop, arrBottom, arrShoes, arrUmb, arrAcc;
+        arrHat = new String[]{"cap", "버킷햇", "뉴스보이 캡", "베레모", "비니"};
+        arrTop = new String[]{"반팔티", "롱슬리브", "후드티", "셔츠", "맨투맨"};
+        arrBottom = new String[]{"숏 팬츠", "와이드 팬츠", "슬랙스", "청바지", "배기팬츠"};
+        arrShoes = new String[]{"쪼리", "단화", "shoes", "부츠", "러닝화"};
+        /*arrAcc = new String[]{"bracelet", "necklace", "piercing", "backpack", "belt"};*/
+
+        if (Integer.parseInt(temp) > 15){
+            ranNum = rd.nextInt(3 - 0 + 1) + 0;
+        } else {
+            ranNum = rd.nextInt(4 - 1 + 1) + 1;
+        }
+
+        switch (categoryNum){
+            case Util.CATEGORY_HAT:
+                category = arrHat[ranNum];
+                arrQuery[Util.CATEGORY_HAT] = category;
+                break;
+            case Util.CATEGORY_TOP:
+                category = arrTop[ranNum];
+                arrQuery[Util.CATEGORY_TOP] = category;
+                break;
+            case Util.CATEGORY_BOTTOM:
+                category = arrBottom[ranNum];
+                arrQuery[Util.CATEGORY_BOTTOM] = category;
+                break;
+            case Util.CATEGORY_SHOES:
+                category = arrShoes[ranNum];
+                arrQuery[Util.CATEGORY_SHOES] = category;
+                break;
+            case Util.CATEGORY_UMB:
+                category = "umbrella";
+                arrQuery[Util.CATEGORY_UMB] = category;
+                break;
+            /*case Util.CATEGORY_ACC:
+                category = arrAcc[ranNum];
+                arrQuery[Util.CATEGORY_ACC] = category;
+                break;*/
+            default:
+                category= "";
+                break;
+        }
+
+        switch (weather){
+            case "Clouds":
+
+                break;
+            case "Clear":
+
+                break;
+            case "Rain": case "Drizzle":
+
+                break;
+            case "Thunderstorm":
+
+                break;
+            case "Snow":
+
+                break;
+            default://안개
+
+                break;
+        }
+        if (category.equals("umbrella")){
+            queryStr = category;
+        } else if ((categoryNum == Util.CATEGORY_TOP || categoryNum == Util.CATEGORY_BOTTOM) && style.equals("스트릿 ")){
+            queryStr = style + category;
+        } else {
+            queryStr = category;
+        }
+        return queryStr;
+    }
 
     class RecommendSetNaverAsync extends AsyncTask<String , Void, ArrayList<SearchVO>> {
 
         @Override
         protected ArrayList<SearchVO> doInBackground(String... strings) {
 
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street hat",Util.CATEGORY_HAT));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street Tshirt",Util.CATEGORY_TOP));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street pants",Util.CATEGORY_BOTTOM));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("street shoes",Util.CATEGORY_SHOES));
-            recommendSetArr.add(recommendSetParser.RecommendSetParser("umbrella",Util.CATEGORY_UMB));
+            if( startCount == 0 ){
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_HAT), Util.CATEGORY_HAT));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_TOP), Util.CATEGORY_TOP));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_BOTTOM), Util.CATEGORY_BOTTOM));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_SHOES), Util.CATEGORY_SHOES));
+                recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(Util.CATEGORY_UMB), Util.CATEGORY_UMB));
+                startCount++;
+                bufferedRecommendSetArr.addAll(recommendSetArr);
+            } else {
+                for (int i = 0; i < bufferedRecommendSetArr.size(); i++){
+                    int removeNum = bufferedRecommendSetArr.get(i).getType()-i;
+                    if (i+removeNum == bufferedRecommendSetArr.get(i).getType()){
+                        recommendSetArr.add(recommendSetParser.RecommendSetParser(settingQuery(i+removeNum), i+removeNum));
+                    }
+                }
+                bufferedRecommendSetArr.clear();
+                bufferedRecommendSetArr.addAll(recommendSetArr);
+            }
 
             return recommendSetArr;
         }
 
         @Override
         protected void onPostExecute(ArrayList<SearchVO> searchVOS) {
-            if( recommendSetAdapter == null ){
-                recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, recommendSetArr, listView);
-
-                /*myListView.setOnScrollListener(scrollListener);*/
-                listView.setAdapter(recommendSetAdapter);
-                recommendSetAdapter.notifyDataSetChanged();
-
-                /*goModelImage.get(0);*/
-
-            }
+            recommendSetAdapter = new RecommendSetAdapter(MainActivity.this, R.layout.search_result_item, searchVOS, listView);
+            listView.setAdapter(recommendSetAdapter);
+            /*recommendSetAdapter.notifyDataSetChanged();*/
         }
     }
+
+    //item 선택
+    View.OnClickListener categorys = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.hat:
+                    new Hat(MainActivity.this);
+                    break;
+                case R.id.top:
+                    new Top(MainActivity.this);
+                    break;
+                case R.id.bottom:
+                    new Bottom(MainActivity.this);
+                    break;
+                case R.id.shoes:
+                    new Shoes(MainActivity.this);
+                    break;
+            }
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        fileSave(cartText);
+        super.onDestroy();
+    }
+
+    public void fileSave(String text){
+
+        File f = new File(Environment.getExternalStorageDirectory()+"/weashion/");
+        if(!f.exists()){
+            f.mkdirs();
+        }
+
+        File f2 = new File(f,  "cart.txt");
+        FileOutputStream fos = null;
+
+        try {
+            fos = new FileOutputStream(f2, true);
+            fos.write((text).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.weather.weashion;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,12 +37,38 @@ public class RecommendSetAdapter extends ArrayAdapter<SearchVO> implements Adapt
 
         LayoutInflater linf = (LayoutInflater)context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         convertView = linf.inflate(resource, null);//resource 라는 북xml을 컨버트뷰로 만들게요
-        rvo = list.get(position);
+        if (list.get(position) == null){
+            rvo = new SearchVO();
+            rvo.setTitle("준비중");
+            rvo.setBrand("");
+            rvo.setLprice("");
+            rvo.setImage("");
+        } else {
+            rvo = list.get(position);
+        }
 
         TextView title = convertView.findViewById(R.id.result_title);
         TextView brand = convertView.findViewById(R.id.result_brand);
         TextView lprice = convertView.findViewById(R.id.result_lprice);
         ImageView img = convertView.findViewById(R.id.result_image);
+
+        if( rvo.getTitle().equals(null)){
+            rvo.setTitle("");
+        }
+        if( rvo.getBrand().equals(null)){
+            rvo.setBrand("");
+        }
+        if( rvo.getLprice().equals(null)){
+            rvo.setLprice("");
+        }
+        if( rvo.getImage().equals(null)){
+            rvo.setImage("");
+        }
+
+        Log.i("err",rvo.getTitle());
+        Log.i("err",rvo.getBrand());
+        Log.i("err",rvo.getLprice());
+        Log.i("err",rvo.getImage());
 
         title.setText( rvo.getTitle() );
         brand.setText( rvo.getBrand() );
