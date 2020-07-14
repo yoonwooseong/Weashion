@@ -102,7 +102,7 @@
 
                 <ImageView
                     android:layout_width="240dp"
-                    android:layout_height="250dp"
+                    android:layout_height="220dp"
                     android:src="@drawable/top"
                     android:scaleType="centerCrop"
                     android:layout_gravity="center"
@@ -406,7 +406,9 @@
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/cartList"/>
+                android:id="@+id/cartList"
+                android:descendantFocusability="blocksDescendants"/>
+
         </LinearLayout>
     </androidx.drawerlayout.widget.DrawerLayout>
     <!--서랍 끝-->

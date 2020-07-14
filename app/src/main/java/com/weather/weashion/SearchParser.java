@@ -24,10 +24,12 @@ public class SearchParser {
     String search = "";
     int start;
 
-
     public ArrayList<SearchVO> Parser(int start, ArrayList<SearchVO> list) {
-
-        search = SearchActivity.search.getText().toString();
+        if (!SearchActivity.queryInSearch.isEmpty()){
+            search = SearchActivity.queryInSearch;
+        } else {
+            search = SearchActivity.search.getText().toString();
+        }
         int count = Util.SEARCH_COUNT;
         this.start = start;
         String apiURL = "https://openapi.naver.com/v1/search/shop.json?query=" + search + "&start=" + start + "&display=" + count;

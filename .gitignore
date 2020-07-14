@@ -12,3 +12,9 @@
 /captures
 .externalNativeBuild
 .cxx
+app/src/main/java/com/weather/weashion/RecommendSetAdapter.java
+app/src/main/res/drawable/iconhat.png
+app/src/main/res/drawable/iconpants.png
+app/src/main/res/drawable/iconshoes.png
+app/src/main/res/drawable/icontshirt.png
+app/src/main/res/drawable/iconumb.png

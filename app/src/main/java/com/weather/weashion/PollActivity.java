@@ -14,7 +14,7 @@ public class PollActivity extends Dialog {
     final CharSequence[] items3 = {"캐주얼","스트릿","미니멀","아메카지","젠더리스","생각없음"};
     AlertDialog.Builder dialog;
     SharedPreferences shared ;
-    boolean mycheck = false;
+    static boolean mycheck = false;
     Context context;
 
     public PollActivity(Context context) {
@@ -46,9 +46,20 @@ public class PollActivity extends Dialog {
                                     Toast.makeText(context.getApplicationContext(), items3[index], Toast.LENGTH_SHORT).show();
                                     String str3 = (String) items3[index];
                                     shared.edit().putString("style", str3);
+                                    dialog.setTitle("다시 보시겠습니까?").setItems(null, new OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) { }
+                                    });
+                                    dialog.setPositiveButton("다시보지않기", click);
+                                    dialog.setNegativeButton("다시보기", new OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) { }
+                                    });
+                                    dialog.setCancelable(false);
+                                    dialog.create();
+                                    dialog.show();
                                 }
                             });
-                            dialog.setPositiveButton("다시보지않기", click);
                             dialog.setCancelable(false);
                             dialog.create();
                             dialog.show();
@@ -74,4 +85,3 @@ public class PollActivity extends Dialog {
         }
     };
 }
-
