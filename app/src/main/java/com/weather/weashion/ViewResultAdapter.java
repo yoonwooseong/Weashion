@@ -57,12 +57,15 @@ public class ViewResultAdapter extends ArrayAdapter<SearchVO> implements Adapter
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {//i : 몇번째 클릭한지
+        if (svo.getLink().equals("")){
 
-        //추출한 id를 통해 상세정보 페이지로 연결할 url준비
-        String detailLink = svo.getLink();
-        Intent intent = new Intent(Intent.ACTION_VIEW);//괄호 안 없으면 구글이나 이상한대감
-        intent.setData( Uri.parse(detailLink) );
-        context.startActivity(intent);//상세보기 페이지로 화면 전환*/
+        } else {
+            //추출한 id를 통해 상세정보 페이지로 연결할 url준비
+            String detailLink = svo.getLink();
+            Intent intent = new Intent(Intent.ACTION_VIEW);//괄호 안 없으면 구글이나 이상한대감
+            intent.setData( Uri.parse(detailLink) );
+            context.startActivity(intent);//상세보기 페이지로 화면 전환*/
+        }
 
     }
 }

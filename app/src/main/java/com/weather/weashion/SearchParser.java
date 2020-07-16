@@ -24,10 +24,12 @@ public class SearchParser {
     String search = "";
     int start;
 
-
     public ArrayList<SearchVO> Parser(int start, ArrayList<SearchVO> list) {
-
-        search = SearchActivity.search.getText().toString();
+        if (!SearchActivity.queryInSearch.isEmpty()){
+            search = SearchActivity.queryInSearch;
+        } else {
+            search = SearchActivity.search.getText().toString();
+        }
         int count = Util.SEARCH_COUNT;
         this.start = start;
         String apiURL = "https://openapi.naver.com/v1/search/shop.json?query=" + search + "&start=" + start + "&display=" + count;
@@ -81,7 +83,17 @@ public class SearchParser {
             return list;//이때 보냄.
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+
+            searchVO = new SearchVO();
+            searchVO.setTitle("제품이 존재하지 않습니다");
+            searchVO.setBrand(" ");
+            searchVO.setLprice(" ");
+            searchVO.setImage(" ");
+            searchVO.setLink("");
+            searchVO.setType(0);
+
+            list.add(searchVO);
+            return list;
         }
 
     }
@@ -129,7 +141,8 @@ public class SearchParser {
                 responseBody.append(line);
 
             }
-
+            lineReader.close();
+            streamReader.close();
             return responseBody.toString();
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
