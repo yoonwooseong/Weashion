@@ -1,0 +1,114 @@
+package com.weather.weashion;
+
+
+import android.util.Log;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ModelParser {
+    ModelVO hatVO;
+    private String searchs = "";
+    private int starts;
+    //통신하면 모든 데이터는 다 vo로 보냄 딱 1번 1개
+    public ModelVO Parser(int start, String search) {
+        this.searchs = search;
+        this.starts = start;
+        String apiURL = "https://openapi.naver.com/v1/search/shop.json?query=" + searchs + "&start=" + starts + "&display=" + 1;
+
+        Map<String, String> responseHeaders = new HashMap<>();
+
+        //아이디 비번
+        responseHeaders.put("X-Naver-Client-Id", "Mze67FDIaGt2lHrQl0Tf");
+        responseHeaders.put("X-Naver-Client-Secret", "jdMkXeydSw");
+
+        String responseBody = get(apiURL, responseHeaders);
+
+        JSONObject jObject;
+        JSONObject itemInfo = null;
+        Log.i("MY", "여기까진" + responseBody);
+        try {
+            jObject = new JSONObject(responseBody);
+
+            hatVO = new ModelVO();
+            itemInfo = (JSONObject)jObject.getJSONArray("items").get(0);
+
+            hatVO.setLink(itemInfo.getString("link"));
+            hatVO.setImage(itemInfo.getString("image"));
+            hatVO.setLprice(itemInfo.getString("lprice"));
+            hatVO.setCategory2(itemInfo.getString("category2"));
+
+            return hatVO;//이때 보냄.
+        } catch (Exception e) {
+            e.printStackTrace();
+            ModelVO hatVO = new ModelVO();
+            hatVO.setLink(" ");
+            hatVO.setImage(" ");
+            hatVO.setLprice(" ");
+            hatVO.setCategory2(" ");
+            return hatVO;
+        }
+    }
+
+        private String get (String apiURL, Map < String, String > responseHeaders){
+            HttpURLConnection con = connect(apiURL);
+            try {
+                con.setRequestMethod("GET");
+                for (Map.Entry<String, String> header : responseHeaders.entrySet()) {
+                    con.setRequestProperty(header.getKey(), header.getValue());
+                }
+
+                int responseCode = con.getResponseCode();
+
+                if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
+                    return readBody(con.getInputStream());
+                } else { // 에러 발생
+                    return readBody(con.getErrorStream());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("API 요청과 응답 실패", e);
+            } finally {
+                con.disconnect();
+            }
+        }//get : 키값 http에 송출준비
+
+        private HttpURLConnection connect (String apiURL){
+            try {
+                URL url = new URL(apiURL);
+                return (HttpURLConnection) url.openConnection();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("API URL이 잘못되었습니다. : " + apiURL, e);
+            } catch (IOException e) {
+                throw new RuntimeException("연결이 실패했습니다. : " + apiURL, e);
+            }
+        }//connect : String타입 url http에 올리기.
+
+        private String readBody (InputStream body){
+            InputStreamReader streamReader = new InputStreamReader(body);
+
+            try (BufferedReader lineReader = new BufferedReader(streamReader)) {
+                StringBuilder responseBody = new StringBuilder();
+
+                String line;
+                while ((line = lineReader.readLine()) != null) {
+
+
+                    responseBody.append(line);
+                }
+                lineReader.close();
+                streamReader.close();
+                return responseBody.toString();
+            } catch (IOException e) {
+                throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
+            }
+        }//readbody : 보낸 내용물을 확인 받고, 내용물 받기.
+    }

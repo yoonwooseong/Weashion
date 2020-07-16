@@ -7,6 +7,15 @@ public class SearchVO {
     private String lprice;//최저가
     private String brand;
     private String maker;
+    private int type;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public String getImage() {
         return image;

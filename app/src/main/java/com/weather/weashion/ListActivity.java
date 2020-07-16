@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import java.util.ArrayList;
 
+//세로본능 - 미완성
 public class ListActivity extends Activity {
     ListView cartList;
     ArrayList<CartVO> list;

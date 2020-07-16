@@ -24,7 +24,7 @@ public class RecommendSetParser {
     public SearchVO RecommendSetParser(String query, int categoryNum) {
 
         int count = 1;
-        int num = new Random().nextInt(Util.SEARCH_COUNT-1);//다른곳 start값 바꾸면 다른 어뎁터는 수정해야함
+        int num = new Random().nextInt(10-1);//다른곳 start값 바꾸면 다른 어뎁터는 수정해야함//이거 갯수늘리면 오류 없을수잇어서
         this.start = num;
         String apiURL = "https://openapi.naver.com/v1/search/shop.json?query=" + query + "&start=" + start + "&display=" + count;
 
@@ -43,42 +43,45 @@ public class RecommendSetParser {
 
         try {
             jObject = new JSONObject(responseBody);
-            for (int i = 0; i < 1 ;i++){
-                searchVO = new SearchVO();
-                itemInfo = (JSONObject) jObject.getJSONArray("items").get(i);
 
-                String title = itemInfo.getString("title");
-                Pattern pattern = Pattern.compile("<.*?>");
-                Matcher matcher = pattern.matcher( title );
+            searchVO = new SearchVO();
+            itemInfo = (JSONObject) jObject.getJSONArray("items").get(0);
+            Log.i("err",responseBody);
 
-                if( matcher.find() ){
-                    String s_title = matcher.replaceAll("");//제거
-                    searchVO.setTitle(s_title);; //b태그가 제거된 타이틀
-                } else {
-                    searchVO.setTitle(title);
-                }
-                searchVO.setLink(itemInfo.getString("link"));
-                searchVO.setImage(itemInfo.getString("image"));
-                searchVO.setLprice(itemInfo.getString("lprice"));
-                searchVO.setBrand(itemInfo.getString("brand"));
-                searchVO.setBrand(itemInfo.getString("maker"));
+            String title = itemInfo.getString("title");
+            Pattern pattern = Pattern.compile("<.*?>");
+            Matcher matcher = pattern.matcher( title );
 
-                Log.i("MY", "이름" + searchVO.getTitle());
-                Log.i("MY", "링크" + searchVO.getLink());
-                Log.i("MY", "이미지" + searchVO.getImage());
-                Log.i("MY", "가격" + searchVO.getLprice());
-                Log.i("MY", "브랜드" + searchVO.getBrand());
-                Log.i("MY", "메이커" + searchVO.getMaker());
-
-                /*MainActivity.goModelImage.add(categoryNum, itemInfo.getString("image"));*/
-
-                /*list.add(searchVO);*/
-
+            if( matcher.find() ){
+                String s_title = matcher.replaceAll("");//제거
+                searchVO.setTitle(s_title);; //b태그가 제거된 타이틀
+            } else {
+                searchVO.setTitle(title);
             }
+            searchVO.setLink(itemInfo.getString("link"));
+            searchVO.setImage(itemInfo.getString("image"));
+            searchVO.setLprice(itemInfo.getString("lprice"));
+            searchVO.setBrand(itemInfo.getString("brand"));
+            searchVO.setBrand(itemInfo.getString("maker"));
+            searchVO.setType(categoryNum);
+
+            Log.i("MY", "이름" + searchVO.getTitle());
+            Log.i("MY", "링크" + searchVO.getLink());
+            Log.i("MY", "이미지" + searchVO.getImage());
+            Log.i("MY", "가격" + searchVO.getLprice());
+            Log.i("MY", "브랜드" + searchVO.getBrand());
+            Log.i("MY", "메이커" + searchVO.getMaker());
+
             return searchVO;//이때 보냄.
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            searchVO = new SearchVO();
+            searchVO.setTitle("준비중");
+            searchVO.setBrand(" ");
+            searchVO.setLprice(" ");
+            searchVO.setImage(" ");
+            searchVO.setType(categoryNum);
+            return searchVO;
         }
     }
 
@@ -126,7 +129,8 @@ public class RecommendSetParser {
                 responseBody.append(line);
 
             }
-
+            lineReader.close();
+            streamReader.close();
             return responseBody.toString();
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
