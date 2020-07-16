@@ -1048,10 +1048,10 @@ public class MainActivity extends Activity {
                 category = "umbrella";
                 arrQuery[Util.CATEGORY_UMB] = category;
                 break;
-            /*case Util.CATEGORY_ACC:
+            case Util.CATEGORY_ACC:
                 category = arrAcc[ranNum];
                 arrQuery[Util.CATEGORY_ACC] = category;
-                break;*/
+                break;
             default:
                 category= "";
                 break;
