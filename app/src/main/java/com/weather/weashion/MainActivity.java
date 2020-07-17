@@ -624,10 +624,11 @@ public class MainActivity extends Activity {
 
 
         //3자리 단위로 , 붙여주기 (현재 적용 안됨)
-        String price = String.format("%,d", Integer.parseInt(myPrice));
+        //String price = String.format("%,d", Integer.parseInt(myPrice));
         /*DecimalFormat formatter = new DecimalFormat("#,###");
         String price = formatter.format(myPrice);*/
 
+        String price = myPrice;
         String img = myImg;String link = myLink;
         String category = myCategory;
 
