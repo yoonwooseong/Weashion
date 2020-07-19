@@ -1,10 +1,6 @@
 # Weashion
 > 현재 위치에 대한 날씨에 따른 옷을 추천해주는 어플리케이션을 만들고자 함.
 
-//[![NPM Version][npm-image]][npm-url]
-//[![Build Status][travis-image]][travis-url]
-//[![Downloads Stats][npm-downloads]][npm-url]
-
 Android Studio (Android 8.1 (Oreo))(JAVA)를 사용해 현재 위치에 대한 날씨와 선호하는 스타일을 조사해 사용자에게 오늘 뭐입을지에 대한 도움을 주고자하는 프로젝트이다.
 OPEN API는 Open Weather Map API, NAVER 검색 쇼핑 API를 사용하였고 라이브러리는 Swipe Menu list View, Glide(이미지 로딩), Ted permission(권한) 라이브러리를 이용했다.
 
