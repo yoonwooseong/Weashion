@@ -504,13 +504,6 @@ public class MainActivity extends Activity {
                     break;
 
                 case R.id.btn_mode_model: case R.id.btn_mode_model_l:
-                    /*Glide.with(MainActivity.this).load(goModelImage.get(0)).into(model_item_0);
-                    Glide.with(MainActivity.this).load(goModelImage.get(1)).into(model_item_1);
-                    Glide.with(MainActivity.this).load(goModelImage.get(2)).into(model_item_2);
-                    Glide.with(MainActivity.this).load(goModelImage.get(3)).into(model_item_3);
-                    Glide.with(MainActivity.this).load(goModelImage.get(4)).into(model_item_4);*/
-
-
                     btn_mode_list.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_list_l.setPaintFlags(Paint.ANTI_ALIAS_FLAG);
                     btn_mode_model.setPaintFlags(btn_mode_model.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -621,7 +614,6 @@ public class MainActivity extends Activity {
     };
 
     public static ArrayList<CartVO> insertData(String myImg, String myLink, String myPrice, String myCategory){//받아온 데이터 여기에 담으면 됨
-
 
         //3자리 단위로 , 붙여주기 (현재 적용 안됨)
         //String price = String.format("%,d", Integer.parseInt(myPrice));
