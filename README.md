@@ -56,25 +56,15 @@ OPEN API는 Open Weather Map API, NAVER 검색 쇼핑 API를 사용하였고 라
 하단 추천 의상 버튼 클릭 시 랜덤으로 추천
 
 
-## 개발 환경 설정
-
-모든 개발 의존성 설치 방법과 자동 테스트 슈트 실행 방법을 운영체제 별로 작성합니다.
-
-```sh
-make install
-npm test
-```
-
 ## 업데이트 내역
-
+* 0.1.0  
+    * 프로젝트 완성
 * 0.0.0
     * prototype 완성
 
 ## 정보
 
  yoonwooseong – dntjd851@naver.com
-
-MIT 라이센스를 준수하며 ``LICENSE``에서 자세한 정보를 확인할 수 있습니다.
 
 [https://github.com/yoonwooseong/github-link](https://github.com/yoonwooseong/)
 
