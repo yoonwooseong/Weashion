@@ -6,17 +6,16 @@ OPEN API는 Open Weather Map API, NAVER 검색 쇼핑 API를 사용하였고 라
 
 ![image](https://user-images.githubusercontent.com/57824259/87865507-50c98580-c9b1-11ea-8a8a-a342742edc6c.png)
 
-## 설치 방법
-
-언어 : JAVA
-프로그램 : Android Studio (Android 8.1 (Oreo)) 
+## 환경
+>언어 : JAVA  
+>프로그램 : Android Studio (Android 8.1 (Oreo)) 
 
 ## 기획 의도
 
-날씨에 따른 의상 추천
-선호 의상 분석
-구매 유도
-쇼핑몰과 제휴를 맺어 홍보
+ - 날씨에 따른 의상 추천  
+ - 선호 의상 분석  
+ - 구매 유도  
+ - 쇼핑몰과 제휴를 맺어 홍보  
 
 ## 사용 예제
  - 권한 설정(Tedpermission Library 이용)  
